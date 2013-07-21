@@ -15,13 +15,15 @@ GameMap::GameMap(int x, int y, int z)
 
 	for(int i=0; i<x; i++){	//x
 		for(int j=0; j<y; j++) {//y
-			for(int k=0; k<(z-1); k++) {//z
+			//INITIALIZE BLOCKS
+			for(int k=0; k<(z-UNEVEN_LAYERS); k++) {//z
 				blockMap[i][j][k] = new Block(1 + rand() % 3);	//Bottom layers are solid/whole with random soil type
 			}
-			for(int k=z-1; k<z; k++){ //z
+			for(int k=z-UNEVEN_LAYERS; k<z; k++){ //z
 				if(rand() % 2 && blockMap[i][j][k-1] != NULL)		//will randomly create some as long as the block below it is soil
 					blockMap[i][j][k] = new Block(1 + rand() % 3);
 			}
+			//INITIALIZE UNITS
 			unitsOnMap[i][j] = NULL;
 		}
 	}
@@ -79,12 +81,36 @@ void GameMap::addUnit(int player, int x, int y)	//This should only add initial u
 	unitsOnMap[x][y]->setOwner(players.at(player));
 }
 
-void GameMap::nextTurn(int nextPlayer)
+void GameMap::nextTurn()
 {
-	for(int i=0; i<x; i++)
-		for(int j=0; j<y; j++)
-			if(unitsOnMap[i][j] != NULL && unitsOnMap[i][j]->getOwner() == players.at(nextPlayer))
-				unitsOnMap[i][j]->addMinerals();
+	curPlayer = (curPlayer+1) % numPlayers;
+	//update units and produce their seeds
+	for(int i=0; i<x; i++){
+		for(int j=0; j<y; j++){
+			if(unitsOnMap[i][j] != NULL && unitsOnMap[i][j]->getOwner() == players.at(curPlayer)){
+				int num = unitsOnMap[i][j]->addMinerals();
+				for(int i=0; i<num;i++){
+					struct seed newSeed;
+					newSeed.playerNum = curPlayer;
+					newSeed.xLoc = i;
+					newSeed.yLoc = j;
+					seeds.push_back(newSeed);
+				}
+			}
+		}
+	}
+	//Turn some seeds into units
+	for(int i=0;i<seeds.size(); i++){
+		if(!(unitsOnMap[seeds.at(i).xLoc][seeds.at(i).yLoc] != NULL)  && true){	//should check germinate of block seed is on where 'true' is
+			addUnit(seeds.at(i).playerNum, seeds.at(i).xLoc, seeds.at(i).yLoc);
+			//delete the seed because it is now a plant!
+		}
+	}
+	//move seeds
+	for(int i=0; i<seeds.size(); i++){
+		seeds.at(i).xLoc += 1;
+		seeds.at(i).yLoc += 1;
+	}
 }
 void GameMap::draw(int camX, int camY, int camZ)
 {

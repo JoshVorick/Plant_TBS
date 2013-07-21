@@ -27,6 +27,8 @@
 //Function Prototypes
 void processKeyDown(ALLEGRO_EVENT ev, GameState *state);
 void changeState(int newID, GameState *state);
+const int WIDTH = 1920;
+const int HEIGHT = 1080;
 //Global Constants and Variables as needed
 
 int main()
@@ -34,8 +36,6 @@ int main()
 	//Create local variables
 	const int FPS = 60;
 	const int NUM_SAMPLES = 8; //number of sounds playing at one time
-	const int WIDTH = 1920;
-	const int HEIGHT = 1080;
 	int windowWidth = WIDTH; //NOT display width. Width of the actual on screen window. Used to make mouse still work after resizing display
 	int windowHeight = HEIGHT; //^same^
 	bool done = false; 
@@ -110,16 +110,19 @@ int main()
 					case 1://start GameLobby()
 						delete curState;		//prevent memory leakaage, deletes old GameState
 						curState = new GameLobby();
+						curState->setwindowSize(windowWidth, windowHeight);
 						break;
 					case 2://go to start menu
 						delete curState;
 						curState = new StartMenu();
+						curState->setwindowSize(windowWidth, windowHeight);
 						break;
 					case 3://Go from lobby into game
 						GameMap* map = curState->getMap();
 						delete curState;
 						curState = new Game();
 						curState->addMap(map);
+						curState->setwindowSize(windowWidth, windowHeight);
 						//delete tempPlayers somehow?
 						break;
 				}
@@ -135,6 +138,7 @@ int main()
 			case ALLEGRO_EVENT_DISPLAY_RESIZE:
 				windowWidth = ev.display.width;
 				windowHeight = ev.display.height;
+				curState->setwindowSize(windowWidth, windowHeight);
 				break;
 		}
 		if(redraw & al_is_event_queue_empty(event_queue)){
@@ -168,6 +172,9 @@ void processKeyDown(ALLEGRO_EVENT ev, GameState *state)
 			break;
 		case ALLEGRO_KEY_SPACE:
 			state->keyPressSpace();
+			break;
+		case ALLEGRO_KEY_ENTER:
+			state->keyPressEnter();
 			break;
 	}
 }

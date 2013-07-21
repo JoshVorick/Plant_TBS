@@ -41,10 +41,8 @@ public:
 	void setOwner(Player* newOwner) {owner = newOwner;}	//Sets the player who owns the plant
 	Player* getOwner() {return owner;}	//Returns the owner of the plant
 	int getResilience() {return resilience;}	//Returns the defense stat of the plant
-	int produceSeeds() {return 0;}	//Decrements turnsUntilSeeds or produces seeds if turnsUntilSeeds equals 0, in which case turnsUntilSeeds is reset
-				//This way we can call produceSeeds() for all of a player's plants rather than
-				//checking to see if they are ready to produce seeds
 	void addBlock(Block* newBlock) {ownedBlocks.push_back(newBlock);}	//Adds another block to the list of blocks the plant posesses
 	void removeBlock(Block* blockToRemove) {}	//Removes a block from the plant's ownership
-	void virtual addMinerals() {if(level<2)level++;}	//Gets minerals from its soil blocks. Also calculates if it needs to make seeds and calculates level and stuff
+	int virtual addMinerals() {if(level<2)level++; return 3;}	//Gets minerals from its soil blocks. Also calculates if it needs to make seeds and calculates level and stuff
+													//Returns number of seeds dropped/created
 };

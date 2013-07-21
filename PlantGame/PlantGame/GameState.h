@@ -14,6 +14,7 @@ private:
 protected:
 	int mouseX;
 	int mouseY;
+	int windowWidth, windowHeight;
 	ALLEGRO_FONT *font36;
 	GameMap* map;			//Map of everything on screen
 	GameOptions* options;	//Object that encapsulates all in-game options like fog of war, etc.
@@ -23,12 +24,14 @@ public:
 	~GameState(){al_destroy_font(font36);}
 
 	void setMousePos(int x, int y) {mouseX = x; mouseY = y;}
+	void setwindowSize(int w, int h) {windowWidth = w; windowHeight = h;}
 
 	void virtual keyPressA() {}	//called when A is pressed
 	void virtual keyPressD() {}	//etcetera
 	void virtual keyPressS() {}
 	void virtual keyPressW() {}
 	void virtual keyPressSpace() {}
+	void virtual keyPressEnter() {}
 	void virtual scroll(int dz) {}
 
 	void virtual addMap(GameMap* newMap) {map = newMap;}	//adds vector of players to the class

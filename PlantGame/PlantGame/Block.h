@@ -7,7 +7,7 @@
 
 enum blockIDS {SOIL1, SOIL2, SOIL3, SOIL4}; //AIR is NULL pointer, see GameMap
 const int NUM_SOIL_TYPES = 4;
-const int MAX_PLAYERS = 8;
+const int MAX_PLAYERS = 2;
 
 class Block
 {

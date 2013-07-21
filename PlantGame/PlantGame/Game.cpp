@@ -25,22 +25,17 @@ void Game::addMap(GameMap* newMap)
 {
 	map = newMap;
 	map->addUnit(1,0,0);
-	map->addUnit(1,1,7);
-	map->addUnit(0,3,4);
-	map->addUnit(0,4,8);
 	map->addUnit(0,9,9);
 }
 
 void Game::keyPressA()
 {
 	camX += 100;
-	map->nextTurn(0);
 }
 
 void Game::keyPressD()
 {
 	camX -= 100;
-	map->nextTurn(1);
 }
 
 void Game::keyPressS()
@@ -51,6 +46,11 @@ void Game::keyPressS()
 void Game::keyPressW()
 {
 	camY += 100;
+}
+
+void Game::keyPressEnter()
+{
+	map->nextTurn();
 }
 
 void Game::keyPressSpace()
@@ -84,8 +84,8 @@ void Game::draw()
 	al_draw_text(font36, al_map_rgb(100,0,100), 25,95,0, "Use WASD and scroll");
 	//draw players
 	std::vector<Player*> players = map->getPlayers();
-	al_draw_textf(font36, al_map_rgb(255,255,255), 1920/2, 1080/2-35, ALLEGRO_ALIGN_CENTRE, "%i Player(s)", players.size());
+	al_draw_textf(font36, al_map_rgb(255,255,255), windowWidth/2, windowHeight/2-35, ALLEGRO_ALIGN_CENTRE, "%i Player(s)", players.size());
 
 	for(unsigned int i=0; i<players.size(); i++)
-		al_draw_textf(font36, al_map_rgb(255,255,0), 1920/2, 1080/2 + (35*i), ALLEGRO_ALIGN_CENTRE, (char*)(players.at(i)->getName().c_str()));
+		al_draw_textf(font36, al_map_rgb(255,255,0), windowWidth/2, windowHeight/2 + (35*i), ALLEGRO_ALIGN_CENTRE, (char*)(players.at(i)->getName().c_str()));
 }
