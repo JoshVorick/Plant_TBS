@@ -4,10 +4,12 @@
 
 Seed::Seed()
 {
+
 }
 
 Seed::~Seed()
 {
+
 }
 
 bool Seed::doesGerminate()

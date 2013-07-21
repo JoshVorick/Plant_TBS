@@ -18,8 +18,7 @@ GameLobby::~GameLobby()
 //===========================================================================================================
 void GameLobby::keyPressA()
 {
-	if(map != NULL)
-	{
+	if(map != NULL){
 		Player* newPlayer = new Player();
 		newPlayer->setName("Player A");
 		map->addPlayer(newPlayer);
@@ -28,8 +27,7 @@ void GameLobby::keyPressA()
 
 void GameLobby::keyPressD()
 {
-	if(map != NULL)
-	{
+	if(map != NULL){
 		Player* newPlayer = new Player();
 		newPlayer->setName("Player D");
 		map->addPlayer(newPlayer);
@@ -38,10 +36,12 @@ void GameLobby::keyPressD()
 
 void GameLobby::keyPressS()
 {
+
 }
 
 void GameLobby::keyPressW()
 {
+
 }
 
 void GameLobby::keyPressSpace()
@@ -52,6 +52,7 @@ void GameLobby::keyPressSpace()
 
 void GameLobby::scroll(int dz)
 {
+
 }
 //===========================================================================================================
 int GameLobby::update()

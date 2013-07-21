@@ -14,10 +14,11 @@ public:
 					//to a default from the .ini file and then allow the player to make
 					//whatever changes they want, maybe allow saving new defaults
 	~GameOptions();
-	bool isTurnLimitOn();	//Whether or not the turn-based end condition is on
-	void flipTurnLimit();	//Changes the state of turnLimit
-	void setMaximumTurns(int maxTurns);	//Sets the value of maximumTurns
-	bool isTimeLimitOn();	//Similar to above
-	void flipTimeLimit();
-	void setMaximumTime(int maxTime);	//Maybe we pass the value in seconds?
+
+	bool isTurnLimitOn() {return turnLimit;}	//Whether or not the turn-based end condition is on
+	void flipTurnLimit() {turnLimit = !turnLimit;}	//Changes the state of turnLimit
+	void setMaximumTurns(int maxTurns) {maximumTurns = maxTurns;}	//Sets the value of maximumTurns
+	bool isTimeLimitOn() {return timeLimit;}	//Similar to above
+	void flipTimeLimit() {timeLimit = !timeLimit;}
+	void setMaximumTime(int maxTime) {maximumTime = maxTime;}	//Maybe we pass the value in seconds?
 };

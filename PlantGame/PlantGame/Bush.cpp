@@ -6,3 +6,8 @@ Bush::Bush()
 	Unit();
 	classID = BUSH;
 }
+
+Bush::~Bush()
+{
+
+}

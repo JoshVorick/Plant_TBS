@@ -10,8 +10,10 @@ private:
 	//Add more stuff as we come up with it
 
 public:
-	double getMaxHPBonus();	//Returns bonus to max hp
-	double getMineralEfficiencyBonus();	//Returns bonus to mineral efficiency
-	double getWaterEfficiencyBonus();	//Returns bonus to water efficiency
-	double getSeedBonus();	//Returns bonus to seed production
+	EvoTree();
+	~EvoTree();
+	double getMaxHPBonus() {return maxHPBonus;}	//Returns bonus to max hp
+	double getMineralEfficiencyBonus() {return mineralEfficiencyBonus;}	//Returns bonus to mineral efficiency
+	double getWaterEfficiencyBonus() {return waterEfficiencyBonus;}	//Returns bonus to water efficiency
+	double getSeedBonus() {return seedBonus;}	//Returns bonus to seed production
 };

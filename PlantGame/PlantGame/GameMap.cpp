@@ -7,24 +7,24 @@ GameMap::GameMap(int x, int y, int z)
 	this->y = y;
 	this->z = z;
 	numPlayers = 2;	//Max of 2 players on this map
+
 	for(int i=0; i<x+1; i++)	//x
 		for(int j=0; j<y+1; j++) //y
 			for(int k=0; k<z+1; k++)
 				blockMap[i][j][k] = NULL;
-	for(int i=0; i<x; i++)	//x
-		for(int j=0; j<y; j++) //y
-		{
-			for(int k=0; k<(z-1); k++) //z
-			{
+
+	for(int i=0; i<x; i++){	//x
+		for(int j=0; j<y; j++) {//y
+			for(int k=0; k<(z-1); k++) {//z
 				blockMap[i][j][k] = new Block(1 + rand() % 3);	//Bottom layers are solid/whole with random soil type
 			}
-			for(int k=z-1; k<z; k++) //z
-			{
+			for(int k=z-1; k<z; k++){ //z
 				if(rand() % 2 && blockMap[i][j][k-1] != NULL)		//will randomly create some as long as the block below it is soil
 					blockMap[i][j][k] = new Block(1 + rand() % 3);
 			}
 			unitsOnMap[i][j] = NULL;
 		}
+	}
 
 	blockImages[0] = al_load_bitmap("Bitmaps/Soil1.bmp");
 	blockImages[1] = al_load_bitmap("Bitmaps/Soil2.bmp");
@@ -48,8 +48,7 @@ GameMap::GameMap(int x, int y, int z)
 	blockPerceivedHeight = 32;
 
 	for(int i=0;i<NUM_UNIT_TYPES;i++)
-		for(int j=0;j<NUM_IMAGES_PER_UNIT;j++)
-		{
+		for(int j=0;j<NUM_IMAGES_PER_UNIT;j++){
 			unitWidths[i][j] = al_get_bitmap_width(unitImages[i][j]);
 			unitHeights[i][j] = al_get_bitmap_height(unitImages[i][j]);
 		}
@@ -57,6 +56,7 @@ GameMap::GameMap(int x, int y, int z)
 
 GameMap::~GameMap()
 {
+
 }
 
 bool GameMap::addPlayer(Player* newPlayer)
@@ -89,18 +89,18 @@ void GameMap::nextTurn(int nextPlayer)
 void GameMap::draw(int camX, int camY, int camZ)
 {
 	//Draws all blocks that are missing a block above or in front of them
-	for(int i=0; i<x; i++)	//x
-		for(int j=0; j<y; j++) //y
-		{	
+	for(int i=0; i<x; i++){	//x
+		for(int j=0; j<y; j++){ //y{	
 			int top=0;
-			for(int k=0; k<camZ; k++)//z
-			{
-				if(blockMap[i][j][k] != NULL)
-				{
-					if(k==camZ-1 || !(blockMap[i+1][j][k] != NULL && blockMap[i][j+1][k] != NULL && blockMap[i][j][k+1] != NULL))
+			for(int k=0; k<camZ; k++){//z
+				if(blockMap[i][j][k] != NULL){
+					if(k==camZ-1 || !(blockMap[i+1][j][k] != NULL && blockMap[i][j+1][k] != NULL && blockMap[i][j][k+1] != NULL)){
 						al_draw_bitmap(blockImages[blockMap[i][j][k]->getBitmap()],
 							camX+((x-1)*blockWidth/2)+(i*blockWidth/2)-(j*blockWidth/2),
 							camY+(camZ*blockPerceivedHeight)+((j+i)*(blockHeight-blockPerceivedHeight)/2)-((k)*(blockPerceivedHeight-4)),0);
+						//al_flip_display();
+						//al_rest(0.03);
+					}
 					top++;
 				}
 			}
@@ -109,8 +109,9 @@ void GameMap::draw(int camX, int camY, int camZ)
 				al_draw_bitmap(unitImages[unitsOnMap[i][j]->getClass()][unitsOnMap[i][j]->getSize()],
 					camX+((x-1)*blockWidth/2)+(i*blockWidth/2)-((j-1)*blockWidth/2)-(unitWidths[unitsOnMap[i][j]->getClass()][unitsOnMap[i][j]->getSize()]/2),
 					camY+(camZ*blockPerceivedHeight)+((j+i+2)*(blockHeight-blockPerceivedHeight)/2)-((top)*(blockPerceivedHeight-4))-(unitHeights[unitsOnMap[i][j]->getClass()][unitsOnMap[i][j]->getSize()]),0);
-			/*let's you see how it draws
-			al_flip_display();
-			al_rest(0.1);*/
+			//let's you see how it draws
+			//al_flip_display();
+			//al_rest(0.03);
 		}
+	}
 }

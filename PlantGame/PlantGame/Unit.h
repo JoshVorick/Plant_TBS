@@ -31,6 +31,7 @@ protected:
 public:
 	Unit() {}	//Initialization
 	~Unit() {}	//Garbage collection
+
 	void setID(int newID) {unitID = newID;}
 	int getID() {return unitID;}
 	int getClass() {return classID;}

@@ -4,40 +4,39 @@
 Block::Block(int id)	//Initializes values minearls/water based on ID passed
 {
 	blockID = id;
-	switch(id)
-	{
-	case 1:
-		mineralsAvailable = 250;
-		mineralsGivenPerTurn = 0;	//No roots yet, so none given
-		mineralsReplenishedPerTurn = 100;
-		waterAvailable = 100;
-		waterGivenPerTurn = 0;
-		waterReplenishedPerTurn = 30;
-		break;
-	case 2:
-		mineralsAvailable = 50;
-		mineralsGivenPerTurn = 0;	//No roots yet, so none given
-		mineralsReplenishedPerTurn = 150;
-		waterAvailable = 150;
-		waterGivenPerTurn = 0;
-		waterReplenishedPerTurn = 50;
-		break;
-	case 3:
-		mineralsAvailable = 150;
-		mineralsGivenPerTurn = 0;	//No roots yet, so none given
-		mineralsReplenishedPerTurn = 125;
-		waterAvailable = 75;
-		waterGivenPerTurn = 0;
-		waterReplenishedPerTurn = 30;
-		break;
-	case 4:
-		mineralsAvailable = 350;
-		mineralsGivenPerTurn = 0;	//No roots yet, so none given
-		mineralsReplenishedPerTurn = 80;
-		waterAvailable = 10;
-		waterGivenPerTurn = 0;
-		waterReplenishedPerTurn = 20;
-		break;
+	switch(id){
+		case 1:
+			mineralsAvailable = 250;
+			mineralsGivenPerTurn = 0;	//No roots yet, so none given
+			mineralsReplenishedPerTurn = 100;
+			waterAvailable = 100;
+			waterGivenPerTurn = 0;
+			waterReplenishedPerTurn = 30;
+			break;
+		case 2:
+			mineralsAvailable = 50;
+			mineralsGivenPerTurn = 0;	//No roots yet, so none given
+			mineralsReplenishedPerTurn = 150;
+			waterAvailable = 150;
+			waterGivenPerTurn = 0;
+			waterReplenishedPerTurn = 50;
+			break;
+		case 3:
+			mineralsAvailable = 150;
+			mineralsGivenPerTurn = 0;	//No roots yet, so none given
+			mineralsReplenishedPerTurn = 125;
+			waterAvailable = 75;
+			waterGivenPerTurn = 0;
+			waterReplenishedPerTurn = 30;
+			break;
+		case 4:
+			mineralsAvailable = 350;
+			mineralsGivenPerTurn = 0;	//No roots yet, so none given
+			mineralsReplenishedPerTurn = 80;
+			waterAvailable = 10;
+			waterGivenPerTurn = 0;
+			waterReplenishedPerTurn = 20;
+			break;
 	}
 }
 

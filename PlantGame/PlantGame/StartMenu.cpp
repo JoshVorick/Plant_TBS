@@ -18,18 +18,22 @@ StartMenu::~StartMenu()
 //===========================================================================================================
 void StartMenu::keyPressA()
 {
+
 }
 
 void StartMenu::keyPressD()
 {
+
 }
 
 void StartMenu::keyPressS()
 {
+
 }
 
 void StartMenu::keyPressW()
 {
+
 }
 
 void StartMenu::keyPressSpace()
@@ -39,6 +43,7 @@ void StartMenu::keyPressSpace()
 
 void StartMenu::scroll(int dz)
 {
+
 }
 //===========================================================================================================
 int StartMenu::update()

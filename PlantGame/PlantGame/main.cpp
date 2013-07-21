@@ -51,7 +51,8 @@ int main()
 	-Read .ini file -- prob has graphics options and stuff
 	-Process .ini file -- this is where we save the data from the .ini to variables in the program
 	*/
-	if(!al_init()) return -1;
+	if(!al_init()) 
+		return -1;
 
 	al_set_new_display_flags(ALLEGRO_RESIZABLE);	//changes based on .ini
 	display = al_create_display(WIDTH, HEIGHT);
@@ -98,14 +99,12 @@ int main()
 			-Update internals
 			-Render output to screen
 		*/
-		switch(ev.type)
-		{
+		switch(ev.type){
 			case ALLEGRO_EVENT_DISPLAY_CLOSE:	//If the red X is pressed
 				done = true;
 				break;
 			case ALLEGRO_EVENT_TIMER:			//Timer ticks (happens 60 times/sec)
-				switch(curState->update())		//updates game and checks to see if it needs to change state
-				{
+				switch(curState->update()){		//updates game and checks to see if it needs to change state
 					case -1:					//If -1 (usually will be), breaks so it doesn't go through all other cases
 						break;
 					case 1://start GameLobby()
@@ -138,8 +137,7 @@ int main()
 				windowHeight = ev.display.height;
 				break;
 		}
-		if(redraw & al_is_event_queue_empty(event_queue))
-		{
+		if(redraw & al_is_event_queue_empty(event_queue)){
 			curState->draw();
 			al_flip_display();
 			al_clear_to_color(al_map_rgb(30,30,30));
@@ -155,30 +153,28 @@ int main()
 //###############################################################################################################
 void processKeyDown(ALLEGRO_EVENT ev, GameState *state)
 {
-	switch(ev.keyboard.keycode)
-	{
-	case ALLEGRO_KEY_A:		//all this is self explanatory
-		state->keyPressA();
-		break;
-	case ALLEGRO_KEY_W:
-		state->keyPressW();
-		break;
-	case ALLEGRO_KEY_D:
-		state->keyPressD();
-		break;
-	case ALLEGRO_KEY_S:
-		state->keyPressS();
-		break;
-	case ALLEGRO_KEY_SPACE:
-		state->keyPressSpace();
-		break;
+	switch(ev.keyboard.keycode){
+		case ALLEGRO_KEY_A:		//all this is self explanatory
+			state->keyPressA();
+			break;
+		case ALLEGRO_KEY_W:
+			state->keyPressW();
+			break;
+		case ALLEGRO_KEY_D:
+			state->keyPressD();
+			break;
+		case ALLEGRO_KEY_S:
+			state->keyPressS();
+			break;
+		case ALLEGRO_KEY_SPACE:
+			state->keyPressSpace();
+			break;
 	}
 }
 
 void changeState(int newID, GameState *state)
 {
-	if (newID == 1)	//new state should be an instance of Game
-	{
+	if (newID == 1){	//new state should be an instance of Game
 		//delete state;
 		GameState *tempState = new Game();
 		state = tempState;
