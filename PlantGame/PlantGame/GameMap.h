@@ -52,7 +52,7 @@ public:
 	int getNumPlayers() {return players.size();}
 
 	void nextTurn(); //Updates units and blocks for next player's turn
-	void draw(int x, int y,int z);	//Draws based on camera position
+	void draw(int x, int y,int z, double zoom);	//Draws based on camera position
 };
 
 struct seed{

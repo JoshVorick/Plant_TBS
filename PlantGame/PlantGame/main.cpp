@@ -170,6 +170,12 @@ void processKeyDown(ALLEGRO_EVENT ev, GameState *state)
 		case ALLEGRO_KEY_S:
 			state->keyPressS();
 			break;
+		case ALLEGRO_KEY_EQUALS:
+			state->keyPressPlus();
+			break;
+		case ALLEGRO_KEY_MINUS:
+			state->keyPressMinus();
+			break;
 		case ALLEGRO_KEY_SPACE:
 			state->keyPressSpace();
 			break;

@@ -30,6 +30,8 @@ public:
 	void virtual keyPressD() {}	//etcetera
 	void virtual keyPressS() {}
 	void virtual keyPressW() {}
+	void virtual keyPressPlus() {}
+	void virtual keyPressMinus() {}
 	void virtual keyPressSpace() {}
 	void virtual keyPressEnter() {}
 	void virtual scroll(int dz) {}

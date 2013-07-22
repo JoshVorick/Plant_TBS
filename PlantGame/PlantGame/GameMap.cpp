@@ -94,22 +94,7 @@ void GameMap::addUnit(int player, int x, int y)	//This should only add initial u
 
 void GameMap::nextTurn()
 {
-	curPlayer = (curPlayer+1) % numPlayers;
-	//update units and produce their seeds
-	for(int i=0; i<x; i++){
-		for(int j=0; j<y; j++){
-			if(unitsOnMap[i][j] != NULL && unitsOnMap[i][j]->getOwner() == curPlayer){
-				int num = unitsOnMap[i][j]->addMinerals();
-				for(int i=0; i<num;i++){
-					struct seed newSeed;
-					newSeed.playerNum = curPlayer;
-					newSeed.xLoc = i;
-					newSeed.yLoc = j;
-					seeds.push_back(newSeed);
-				}
-			}
-		}
-	}
+
 	//Turn some seeds into units
 	for(unsigned int i=0;i<seeds.size(); i++){
 		if(!(unitsOnMap[seeds.at(i).xLoc][seeds.at(i).yLoc] != NULL) && seeds.at(i).playerNum == curPlayer && rand() % 4 == 0){	//should check germinate of block seed is on where 'rand()' is
@@ -119,19 +104,40 @@ void GameMap::nextTurn()
 	}
 	//move seeds
 	for(unsigned int i=0; i<seeds.size(); i++){
-		if(seeds.at(i).xLoc < 10)
+		if(seeds.at(i).xLoc < 9)
 			seeds.at(i).xLoc += rand() % 2;
-		else
+		if(seeds.at(i).xLoc > 0)
 			seeds.at(i).xLoc -= rand() % 2;
-
-		if(seeds.at(i).yLoc < 10)
+		
+		if(seeds.at(i).yLoc < 9)
 			seeds.at(i).yLoc += rand() % 2;
-		else
+		if(seeds.at(i).yLoc > 0)
 			seeds.at(i).yLoc -= rand() % 2;
 	}
+
+	curPlayer = (curPlayer+1) % numPlayers;
+	//update units and produce their seeds
+	for(int i=0; i<x; i++){
+		for(int j=0; j<y; j++){
+			if(unitsOnMap[i][j] != NULL && unitsOnMap[i][j]->getOwner() == curPlayer){
+				int num = unitsOnMap[i][j]->addMinerals();
+				for(int k=0; k<num;k++){
+					struct seed newSeed;
+					newSeed.playerNum = curPlayer;
+					newSeed.xLoc = i;
+					newSeed.yLoc = j;
+					seeds.push_back(newSeed);
+				}
+			}
+		}
+	}
 }
-void GameMap::draw(int camX, int camY, int camZ)
+
+void GameMap::draw(int camX, int camY, int camZ, double zoom)
 {
+	ALLEGRO_DISPLAY* tempDisplay = al_get_current_display();
+	ALLEGRO_BITMAP* tempBitmap = al_create_bitmap(1920, 1080);
+	al_set_target_bitmap(tempBitmap);
 	//Draws all blocks that are missing a block above or in front of them
 	for(int i=0; i<x; i++){	//x
 		for(int j=0; j<y; j++){ //y{	
@@ -168,4 +174,7 @@ void GameMap::draw(int camX, int camY, int camZ)
 			//al_rest(0.03);
 		}
 	}
+	al_set_target_bitmap(al_get_backbuffer(tempDisplay));
+	al_draw_scaled_bitmap(tempBitmap, 0, 0, 1920, 1080, 0, 0, 1920*zoom, 1080*zoom, 0);
+	al_destroy_bitmap(tempBitmap);
 }
