@@ -15,7 +15,7 @@ protected:
 	int hitPoints;	//Number of hitpoints the unit has
 	int maxHitPoints;	//Max hp of a unit
 	int level;		//Level of plant. Increases with mineral surplus
-	Player* owner;	//Pointer to the player who owns the plant
+	int playerNum;	//Pointer to the player who owns the plant
 	std::vector<Block*> ownedBlocks;	//The blocks that the plant has some ownership of; exact percentage is stored within the block
 	int resilience;	//Maybe a measure of how hardy the plant is? How much it takes for it to start dying?
 	int seeds;	//How many seeds are produced by the plant per cycle of seed production
@@ -38,8 +38,8 @@ public:
 	int getSize() {return level;}
 	int getCurrentHitPoints() {return hitPoints;}	//Returns the plant's current hit points
 	int getMaxHitPoints() {return maxHitPoints;}	//Returns the max hp of the plant
-	void setOwner(Player* newOwner) {owner = newOwner;}	//Sets the player who owns the plant
-	Player* getOwner() {return owner;}	//Returns the owner of the plant
+	void setOwner(int playerNum) {this->playerNum = playerNum;}	//Sets the player who owns the plant
+	int getOwner() {return playerNum;}	//Returns the owner of the plant
 	int getResilience() {return resilience;}	//Returns the defense stat of the plant
 	void addBlock(Block* newBlock) {ownedBlocks.push_back(newBlock);}	//Adds another block to the list of blocks the plant posesses
 	void removeBlock(Block* blockToRemove) {}	//Removes a block from the plant's ownership

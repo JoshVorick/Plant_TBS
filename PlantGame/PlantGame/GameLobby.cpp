@@ -21,6 +21,7 @@ void GameLobby::keyPressA()
 	if(map != NULL){
 		Player* newPlayer = new Player();
 		newPlayer->setName("Player A");
+		newPlayer->setClass(0);
 		map->addPlayer(newPlayer);
 	}
 }
@@ -30,6 +31,7 @@ void GameLobby::keyPressD()
 	if(map != NULL){
 		Player* newPlayer = new Player();
 		newPlayer->setName("Player D");
+		newPlayer->setClass(1);
 		map->addPlayer(newPlayer);
 	}
 }

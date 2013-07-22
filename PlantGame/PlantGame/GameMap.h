@@ -25,6 +25,7 @@ private:
 				//For now this is a 10x10x8 array to make it easier
 	ALLEGRO_BITMAP *blockImages[NUM_SOIL_TYPES];
 	ALLEGRO_BITMAP* unitImages[NUM_UNIT_TYPES][NUM_IMAGES_PER_UNIT];
+	ALLEGRO_BITMAP* seedImages[NUM_UNIT_TYPES];	//one seed image per type of unit
 	int unitWidths[NUM_UNIT_TYPES][NUM_IMAGES_PER_UNIT];
 	int unitHeights[NUM_UNIT_TYPES][NUM_IMAGES_PER_UNIT];
 	Unit* unitsOnMap[10][10]; //pointers to the units on the map so that game map has easier time knowing where/if units are
@@ -33,6 +34,8 @@ private:
 	std::vector<struct seed> seeds;
 	int blockWidth;		//the width of the image
 	int blockHeight;	//the height of the image
+	int seedWidths[NUM_UNIT_TYPES];
+	int seedHeights[NUM_UNIT_TYPES];
 	int blockPerceivedHeight;	//the height that the block looks like it has in the image (if it were 3D)
 	int x;	//Dimension along the east-west axis
 	int y;	//Dimension along the north-south axis
@@ -45,6 +48,7 @@ public:
 	bool addPlayer(Player* newPlayer);
 	void addUnit(int player, int x, int y);	//adds a unit at x,y owned by player
 	std::vector<Player*> getPlayers() {return players;}
+	int getCurPlayerNum() {return curPlayer;}
 	int getNumPlayers() {return players.size();}
 
 	void nextTurn(); //Updates units and blocks for next player's turn

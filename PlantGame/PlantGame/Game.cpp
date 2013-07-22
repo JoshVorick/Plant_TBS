@@ -82,6 +82,8 @@ void Game::draw()
 	al_draw_text(font36, al_map_rgb(100,0,100), 25,25,0, "Press Space to go back to the start menu");
 	al_draw_text(font36, al_map_rgb(100,0,100), 25,60,0, "This is the GAME.");
 	al_draw_text(font36, al_map_rgb(100,0,100), 25,95,0, "Use WASD and scroll");
+	al_draw_text(font36, al_map_rgb(150,50,150), 25, 130, 0, (map->getPlayers().at(map->getCurPlayerNum())->getName()).c_str());
+	//al_draw_textf(font36, al_map_rgb(150,50,150), 25, 130, 0, "%i", map->getCurPlayerNum());
 	//draw players
 	std::vector<Player*> players = map->getPlayers();
 	al_draw_textf(font36, al_map_rgb(255,255,255), windowWidth/2, windowHeight/2-35, ALLEGRO_ALIGN_CENTRE, "%i Player(s)", players.size());
