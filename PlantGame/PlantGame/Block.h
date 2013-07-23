@@ -1,15 +1,13 @@
 #pragma once
 
 #include <allegro5\allegro.h>
-#include <allegro5\allegro_image.h>
-#include <vector>
 #include <string>
+#include "Sprite.h"
 
-enum blockIDS {SOIL1, SOIL2, SOIL3, SOIL4}; //AIR is NULL pointer, see GameMap
-const int NUM_SOIL_TYPES = 4;
-const int MAX_PLAYERS = 2;
+#define NUM_SOIL_TYPES 4
+#define MAX_PLAYERS 2
 
-class Block
+class Block : public Sprite
 {
 private:
 	//Images are held in GameMap
@@ -21,7 +19,7 @@ private:
 	int waterGivenPerTurn;	//like mineralsGivenPerTurn
 	int waterReplenishedPerTurn;	//How much water is given to the block after each turn cycle
 
-	std::vector<int> numUnitRoots;	//Array of intes giving the number of roots of each unit in the block
+	int numUnitRoots[MAX_PLAYERS];	//Array of intes giving the number of roots of each unit in the block
 	//Each unit has an id, given to it at creation. Every time a unit is created, an int is added (starting at 0) for every block
 
 public:
