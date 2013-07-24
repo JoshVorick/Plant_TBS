@@ -1,14 +1,13 @@
 #pragma once
 
 #include <vector>
-#include "Sprite.h"
 #include "Block.h"
 #include "Player.h"
 
 class Player;
 enum UNIT_CLASSES {TREE, FLOWER, BUSH};
 
-class Unit : public Sprite
+class Unit
 {
 protected:
 	int classID;	//Determines whether the unit is a flower, bush, or tree

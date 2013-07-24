@@ -102,7 +102,6 @@
     <ClInclude Include="GameState.h" />
     <ClInclude Include="Player.h" />
     <ClInclude Include="Seed.h" />
-    <ClInclude Include="Sprite.h" />
     <ClInclude Include="StartMenu.h" />
     <ClInclude Include="Tree.h" />
     <ClInclude Include="Unit.h" />

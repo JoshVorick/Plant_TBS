@@ -6,7 +6,7 @@ also in GameMap. Blocks may have a doesGerminate(int germChance/resilience) func
 
 #include <vector>
 
-class Seed : public Sprite
+class Seed
 {
 private:
 	int playerNum;	//number of player who owns this seed
@@ -17,5 +17,4 @@ public:
 	Seed(int numPlayer, int plantType) {playerNum = numPlayer; seedType = plantType;}
 	~Seed();
 	int getPlayerNum() {return playerNum;}
-	void draw(ALLEGRO_BITMAP* image);
 };

@@ -64,23 +64,7 @@ GameMap::GameMap(int x, int y, int z)
 			unitHeights[i][j] = al_get_bitmap_height(unitImages[i][j]);
 		}
 	}
-	for(int i=0; i<x; i++){	//x
-		for(int j=0; j<y; j++){ //y
-			int top=0;
-			for(int k=0; k<z; k++){//z
-				if(blockMap[i][j][k] != NULL){
-					blockMap[i][j][k]->setCoordinates(((x-1)*blockWidth/2)+(i*blockWidth/2)-(j*blockWidth/2),
-						(blockPerceivedHeight)+((j+i)*(blockHeight-blockPerceivedHeight)/2)-((k)*(blockPerceivedHeight-4)),1);
-					}
-					top++;
-				}
-				//Initialize plant coordinates to be on top of top block
-				if(unitsOnMap[i][j] != NULL && (top-1 == z || blockMap[i][j][top] == NULL)){
-					unitsOnMap[i][j]->setCoordinates(((x-1)*blockWidth/2)+(i*blockWidth/2)-((j-1)*blockWidth/2)-(unitWidths[unitsOnMap[i][j]->getClass()][unitsOnMap[i][j]->getSize()]/2),
-						(blockPerceivedHeight)+((j+i+2)*(blockHeight-blockPerceivedHeight)/2)-((top)*(blockPerceivedHeight-4))-(unitHeights[unitsOnMap[i][j]->getClass()][unitsOnMap[i][j]->getSize()]),1);
-				}
-		}
-	}
+
 }
 
 GameMap::~GameMap()
@@ -151,13 +135,8 @@ void GameMap::nextTurn()
 
 void GameMap::draw(int camX, int camY, int camZ, double zoom)
 {
-	//Create and set new display to draw everything to a different bitmap
-	//get tempDisplay in order to set display back afterwards
-	//Eventually, do this without all this monkey-crap. Instead make variables tempX and tempY
-	//in the loop that increment between drawing each block/unit
-	//This will make it neater and more efficient
 	ALLEGRO_DISPLAY* tempDisplay = al_get_current_display();
-	ALLEGRO_BITMAP* tempBitmap = al_create_bitmap(1920.0/zoom, 1080.0/zoom);
+	ALLEGRO_BITMAP* tempBitmap = al_create_bitmap(1920, 1080);
 	al_set_target_bitmap(tempBitmap);
 	//Draws all blocks that are missing a block above or in front of them
 	for(int i=0; i<x; i++){	//x
@@ -166,7 +145,9 @@ void GameMap::draw(int camX, int camY, int camZ, double zoom)
 			for(int k=0; k<camZ; k++){//z
 				if(blockMap[i][j][k] != NULL){
 					if(k==camZ-1 || !(blockMap[i+1][j][k] != NULL && blockMap[i][j+1][k] != NULL && blockMap[i][j][k+1] != NULL)){
-						//blockMap[i][j][k]->draw(blockImages[blockMap[i][j][k]->getBitmap()]);
+						al_draw_bitmap(blockImages[blockMap[i][j][k]->getBitmap()],
+							camX+((x-1)*blockWidth/2)+(i*blockWidth/2)-(j*blockWidth/2),
+							camY+(camZ*blockPerceivedHeight)+((j+i)*(blockHeight-blockPerceivedHeight)/2)-((k)*(blockPerceivedHeight-4)),0);
 						//al_flip_display();
 						//al_rest(0.03);
 					}
@@ -175,7 +156,9 @@ void GameMap::draw(int camX, int camY, int camZ, double zoom)
 			}
 			//draw plant on top of top block
 			if(unitsOnMap[i][j] != NULL && (top-1 == camZ || blockMap[i][j][top] == NULL)){
-				unitsOnMap[i][j]->draw(unitImages[unitsOnMap[i][j]->getClass()][unitsOnMap[i][j]->getSize()]);
+				al_draw_bitmap(unitImages[unitsOnMap[i][j]->getClass()][unitsOnMap[i][j]->getSize()],
+					camX+((x-1)*blockWidth/2)+(i*blockWidth/2)-((j-1)*blockWidth/2)-(unitWidths[unitsOnMap[i][j]->getClass()][unitsOnMap[i][j]->getSize()]/2),
+					camY+(camZ*blockPerceivedHeight)+((j+i+2)*(blockHeight-blockPerceivedHeight)/2)-((top)*(blockPerceivedHeight-4))-(unitHeights[unitsOnMap[i][j]->getClass()][unitsOnMap[i][j]->getSize()]),0);
 			}
 			//draw seeds on top of block on top of plant
 			for(unsigned int k=0; k<seeds.size(); k++){
@@ -192,6 +175,6 @@ void GameMap::draw(int camX, int camY, int camZ, double zoom)
 		}
 	}
 	al_set_target_bitmap(al_get_backbuffer(tempDisplay));
-	al_draw_scaled_bitmap(tempBitmap, 0, 0, 1920/zoom, 1080/zoom, 0, 0, 1920, 1080, 0);
+	al_draw_scaled_bitmap(tempBitmap, 0, 0, 1920, 1080, 0, 0, 1920*zoom, 1080*zoom, 0);
 	al_destroy_bitmap(tempBitmap);
 }
