@@ -5,16 +5,16 @@ also in GameMap. Blocks may have a doesGerminate(int germChance/resilience) func
 #pragma once
 
 #include <vector>
+#include "Sprite.h"
+#include "Block.h"
 
-class Seed
+class Seed : public Sprite
 {
 private:
-	int playerNum;	//number of player who owns this seed
-	int seedType;	//Which plant this seed will produce
-	double germinationChance; //{0,1} chance it will germinate
+	int numOwnedBy[MAX_PLAYERS];
 
 public:
-	Seed(int numPlayer, int plantType) {playerNum = numPlayer; seedType = plantType;}
-	~Seed();
-	int getPlayerNum() {return playerNum;}
+	Seed() {}
+	~Seed() {}
+	bool hasSeeds(int playerNum) {} //Returns number of seeds 
 };

@@ -4,12 +4,13 @@
 #include <allegro5\allegro_image.h>
 #include <vector>
 #include <string>
+#include "Sprite.h"
 
 enum blockIDS {SOIL1, SOIL2, SOIL3, SOIL4}; //AIR is NULL pointer, see GameMap
 const int NUM_SOIL_TYPES = 4;
 const int MAX_PLAYERS = 2;
 
-class Block
+class Block : public Sprite
 {
 private:
 	//Images are held in GameMap

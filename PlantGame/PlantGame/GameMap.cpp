@@ -64,7 +64,34 @@ GameMap::GameMap(int x, int y, int z)
 			unitHeights[i][j] = al_get_bitmap_height(unitImages[i][j]);
 		}
 	}
-
+	//Initialize Block and Unit coordinates
+	for(int i=0; i<x; i++){	//x
+		for(int j=0; j<y; j++){ //y{	
+			int top=0;
+			for(int k=0; k<z; k++){//z
+				//Initialize block coordinates
+				if(blockMap[i][j][k] != NULL){
+					blockMap[i][j][k]->setCoordinates(((x-1)*blockWidth/2)+(i*blockWidth/2)-(j*blockWidth/2),
+						blockPerceivedHeight+((j+i)*(blockHeight-blockPerceivedHeight)/2)-((k)*(blockPerceivedHeight-4)),1);
+					top++;
+				}
+			}
+			//Initialize unit coordinates
+			if(unitsOnMap[i][j] != NULL && (top-1 == z || blockMap[i][j][top] == NULL)){
+				unitsOnMap[i][j]->setCoordinates(((x-1)*blockWidth/2)+(i*blockWidth/2)-((j-1)*blockWidth/2)-(unitWidths[unitsOnMap[i][j]->getClass()][unitsOnMap[i][j]->getSize()]/2),
+					blockPerceivedHeight+((j+i+2)*(blockHeight-blockPerceivedHeight)/2)-((top)*(blockPerceivedHeight-4))-(unitHeights[unitsOnMap[i][j]->getClass()][unitsOnMap[i][j]->getSize()]),1);
+			}
+/*			//draw seeds on top of block on top of plant
+			for(unsigned int k=0; k<seeds.size(); k++){
+				if(seeds.at(k).xLoc == i && seeds.at(k).yLoc == j){
+					int classID = players.at(seeds.at(k).playerNum)->getClass();
+					al_draw_bitmap(seedImages[classID],
+						camX+((x-1)*blockWidth/2)+(i*blockWidth/2)-((j-1)*blockWidth/2)-(seedWidths[classID]/2),
+						camY+(camZ*blockPerceivedHeight)+((j+i+2)*(blockHeight-blockPerceivedHeight)/2)-((top)*(blockPerceivedHeight-4))-(seedHeights[classID]),0);
+				}
+			}
+*/		}
+	}
 }
 
 GameMap::~GameMap()
@@ -81,15 +108,46 @@ bool GameMap::addPlayer(Player* newPlayer)
 	return true;
 }
 
-void GameMap::addUnit(int player, int x, int y)	//This should only add initial units (future units will be added by GameMap from seeds
+void GameMap::addUnit(int player, int xLoc, int yLoc)	//This should only add initial units (future units will be added by GameMap from seeds
 {
 	//Get player's settings for their unit and adds it to unitsOnMap[x][y]
 	if(players.at(player)->getClass() == 0)
-		unitsOnMap[x][y] = new Tree();
+		unitsOnMap[xLoc][yLoc] = new Tree();
 	else
-		unitsOnMap[x][y] = new Flower();
+		unitsOnMap[xLoc][yLoc] = new Flower();
 
-	unitsOnMap[x][y]->setOwner(player);
+	//SET coordinates for new block
+	//First figure out how high top block is
+	int top=0;
+	for(int k=0; k<z; k++)
+		if(blockMap[xLoc][yLoc][k] != NULL)
+			top++;
+		else
+			break;
+
+	//set coordinates based on that
+	unitsOnMap[xLoc][yLoc]->setCoordinates(((x-1)*blockWidth/2)+(xLoc*blockWidth/2)-((yLoc-1)*blockWidth/2)-(unitWidths[unitsOnMap[xLoc][yLoc]->getClass()][unitsOnMap[xLoc][yLoc]->getSize()]/2),
+		blockPerceivedHeight+((yLoc+xLoc+2)*(blockHeight-blockPerceivedHeight)/2)-((top)*(blockPerceivedHeight-4))-(unitHeights[unitsOnMap[xLoc][yLoc]->getClass()][unitsOnMap[xLoc][yLoc]->getSize()]),1);
+
+	unitsOnMap[xLoc][yLoc]->setOwner(player);
+}
+
+void GameMap::changeCamera(int dx, int dy, int dz, double dZoom){
+	for(int i=0; i<x; i++){	//x
+		for(int j=0; j<y; j++){ //y{	
+			int top=0;
+			for(int k=0; k<z; k++){//z
+				if(blockMap[i][j][k] != NULL){
+					blockMap[i][j][k]->incrementCoordinates(dx, dy - (dz*blockPerceivedHeight), dZoom);
+					top++;
+				}else
+					break;
+			}
+			//draw plant on top of top block
+			if(unitsOnMap[i][j] != NULL)
+				unitsOnMap[i][j]->incrementCoordinates(dx, dy - (dz*blockPerceivedHeight), dZoom);
+		}
+	}
 }
 
 void GameMap::nextTurn()
@@ -121,12 +179,25 @@ void GameMap::nextTurn()
 		for(int j=0; j<y; j++){
 			if(unitsOnMap[i][j] != NULL && unitsOnMap[i][j]->getOwner() == curPlayer){
 				int num = unitsOnMap[i][j]->addMinerals();
-				for(int k=0; k<num;k++){
-					struct seed newSeed;
-					newSeed.playerNum = curPlayer;
-					newSeed.xLoc = i;
-					newSeed.yLoc = j;
-					seeds.push_back(newSeed);
+				if(num != -1){
+					//Update x and y, because it will be different if the unit grew
+					int top=0;
+					for(int k=0; k<z; k++)
+						if(blockMap[i][j][k] != NULL)
+							top++;
+						else
+							break;
+
+					unitsOnMap[i][j]->setCoordinates(((x-1)*blockWidth/2)+(i*blockWidth/2)-((j-1)*blockWidth/2)-(unitWidths[unitsOnMap[i][j]->getClass()][unitsOnMap[i][j]->getSize()]/2),
+						blockPerceivedHeight+((j+i+2)*(blockHeight-blockPerceivedHeight)/2)-((top)*(blockPerceivedHeight-4))-(unitHeights[unitsOnMap[i][j]->getClass()][unitsOnMap[i][j]->getSize()]),1);
+					//Make a new seeds based on if the nuit made more or not
+					for(int k=0; k<num;k++){
+						struct seed newSeed;
+						newSeed.playerNum = curPlayer;
+						newSeed.xLoc = i;
+						newSeed.yLoc = j;
+						seeds.push_back(newSeed);
+					}
 				}
 			}
 		}
@@ -145,9 +216,7 @@ void GameMap::draw(int camX, int camY, int camZ, double zoom)
 			for(int k=0; k<camZ; k++){//z
 				if(blockMap[i][j][k] != NULL){
 					if(k==camZ-1 || !(blockMap[i+1][j][k] != NULL && blockMap[i][j+1][k] != NULL && blockMap[i][j][k+1] != NULL)){
-						al_draw_bitmap(blockImages[blockMap[i][j][k]->getBitmap()],
-							camX+((x-1)*blockWidth/2)+(i*blockWidth/2)-(j*blockWidth/2),
-							camY+(camZ*blockPerceivedHeight)+((j+i)*(blockHeight-blockPerceivedHeight)/2)-((k)*(blockPerceivedHeight-4)),0);
+						blockMap[i][j][k]->draw(blockImages[blockMap[i][j][k]->getBitmap()]);
 						//al_flip_display();
 						//al_rest(0.03);
 					}
@@ -156,9 +225,7 @@ void GameMap::draw(int camX, int camY, int camZ, double zoom)
 			}
 			//draw plant on top of top block
 			if(unitsOnMap[i][j] != NULL && (top-1 == camZ || blockMap[i][j][top] == NULL)){
-				al_draw_bitmap(unitImages[unitsOnMap[i][j]->getClass()][unitsOnMap[i][j]->getSize()],
-					camX+((x-1)*blockWidth/2)+(i*blockWidth/2)-((j-1)*blockWidth/2)-(unitWidths[unitsOnMap[i][j]->getClass()][unitsOnMap[i][j]->getSize()]/2),
-					camY+(camZ*blockPerceivedHeight)+((j+i+2)*(blockHeight-blockPerceivedHeight)/2)-((top)*(blockPerceivedHeight-4))-(unitHeights[unitsOnMap[i][j]->getClass()][unitsOnMap[i][j]->getSize()]),0);
+				unitsOnMap[i][j]->draw(unitImages[unitsOnMap[i][j]->getClass()][unitsOnMap[i][j]->getSize()]);
 			}
 			//draw seeds on top of block on top of plant
 			for(unsigned int k=0; k<seeds.size(); k++){

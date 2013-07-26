@@ -51,6 +51,7 @@ public:
 	int getCurPlayerNum() {return curPlayer;}
 	int getNumPlayers() {return players.size();}
 
+	void changeCamera(int dx, int dy, int dz, double dZoom);
 	void nextTurn(); //Updates units and blocks for next player's turn
 	void draw(int x, int y,int z, double zoom);	//Draws based on camera position
 };

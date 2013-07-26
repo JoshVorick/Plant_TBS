@@ -3,11 +3,12 @@
 #include <vector>
 #include "Block.h"
 #include "Player.h"
+#include "Sprite.h"
 
 class Player;
 enum UNIT_CLASSES {TREE, FLOWER, BUSH};
 
-class Unit
+class Unit : public Sprite
 {
 protected:
 	int classID;	//Determines whether the unit is a flower, bush, or tree
@@ -45,4 +46,5 @@ public:
 	void removeBlock(Block* blockToRemove) {}	//Removes a block from the plant's ownership
 	int virtual addMinerals() {if(level<2)level++; return 3;}	//Gets minerals from its soil blocks. Also calculates if it needs to make seeds and calculates level and stuff
 													//Returns number of seeds dropped/created
+													//Returns -1 if it doesnt grow nor make seeds
 };

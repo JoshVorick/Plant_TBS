@@ -32,33 +32,39 @@ void Game::addMap(GameMap* newMap)
 void Game::keyPressA()
 {
 	camX += 100;
+	map->changeCamera(100, 0, 0, 0);
 }
 
 void Game::keyPressD()
 {
 	camX -= 100;
+	map->changeCamera(-100, 0, 0, 0);
 }
 
 void Game::keyPressS()
 {
 	camY -= 100;
+	map->changeCamera(0, -100, 0, 0);
 }
 
 void Game::keyPressW()
 {
 	camY += 100;
+	map->changeCamera(0, 100, 0, 0);
 }
 
 void Game::keyPressPlus()
 {
 	if(zoom < 2)
 		zoom += 0.25;
+	//map->changeCamera(0, 0, 0, 0.25);
 }
 
 void Game::keyPressMinus()
 {
 	if(zoom > 0.25)
 		zoom -= 0.25;
+	//map->changeCamera(0, 0, 0, -0.25);
 }
 
 void Game::keyPressEnter()
@@ -78,7 +84,10 @@ void Game::scroll(int dz)
 		camZ = 1;		//These are
 	else if(camZ > 8)		//to keep camZ in bounds
 		camZ = 8;
-	else camY += dz * -32;	//to make it look like the above layers are being added on top when scrolled through
+	else{
+		camY += dz * -32;	//to make it look like the above layers are being added on top when scrolled through
+		map->changeCamera(0, 0, dz, 0);
+	}
 }
 //===========================================================================================================
 int Game::update()

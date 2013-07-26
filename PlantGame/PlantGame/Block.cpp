@@ -3,6 +3,7 @@
 
 Block::Block(int id)	//Initializes values minearls/water based on ID passed
 {
+	Sprite();
 	blockID = id;
 	switch(id){
 		case 1:
