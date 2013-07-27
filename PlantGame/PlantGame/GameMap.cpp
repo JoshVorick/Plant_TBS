@@ -125,11 +125,11 @@ void GameMap::addUnit(int player, int xLoc, int yLoc)	//This should only add ini
 		else
 			break;
 
-	//set coordinates based on that
-	unitsOnMap[xLoc][yLoc]->setCoordinates(((x-1)*blockWidth/2)+(xLoc*blockWidth/2)-((yLoc-1)*blockWidth/2)-(unitWidths[unitsOnMap[xLoc][yLoc]->getClass()][unitsOnMap[xLoc][yLoc]->getSize()]/2),
-		blockPerceivedHeight+((yLoc+xLoc+2)*(blockHeight-blockPerceivedHeight)/2)-((top)*(blockPerceivedHeight-4))-(unitHeights[unitsOnMap[xLoc][yLoc]->getClass()][unitsOnMap[xLoc][yLoc]->getSize()]),1);
-
 	unitsOnMap[xLoc][yLoc]->setOwner(player);
+
+	//set coordinates based on block below it
+	unitsOnMap[xLoc][yLoc]->setCoordinates(blockMap[xLoc][yLoc][top-1]->getX()+(blockWidth/2)-(unitWidths[players.at(player)->getClass()][unitsOnMap[xLoc][yLoc]->getSize()]/2),
+		blockMap[xLoc][yLoc][top-1]->getY()+(blockHeight/2)-(unitHeights[players.at(player)->getClass()][unitsOnMap[xLoc][yLoc]->getSize()]), 1);
 }
 
 void GameMap::changeCamera(int dx, int dy, int dz, double dZoom){
@@ -138,14 +138,13 @@ void GameMap::changeCamera(int dx, int dy, int dz, double dZoom){
 			int top=0;
 			for(int k=0; k<z; k++){//z
 				if(blockMap[i][j][k] != NULL){
-					blockMap[i][j][k]->incrementCoordinates(dx, dy - (dz*blockPerceivedHeight), dZoom);
+					blockMap[i][j][k]->incrementCoordinates(dx, dy, dZoom);
 					top++;
 				}else
 					break;
 			}
-			//draw plant on top of top block
 			if(unitsOnMap[i][j] != NULL)
-				unitsOnMap[i][j]->incrementCoordinates(dx, dy - (dz*blockPerceivedHeight), dZoom);
+				unitsOnMap[i][j]->incrementCoordinates(dx, dy, dZoom);
 		}
 	}
 }
@@ -188,8 +187,8 @@ void GameMap::nextTurn()
 						else
 							break;
 
-					unitsOnMap[i][j]->setCoordinates(((x-1)*blockWidth/2)+(i*blockWidth/2)-((j-1)*blockWidth/2)-(unitWidths[unitsOnMap[i][j]->getClass()][unitsOnMap[i][j]->getSize()]/2),
-						blockPerceivedHeight+((j+i+2)*(blockHeight-blockPerceivedHeight)/2)-((top)*(blockPerceivedHeight-4))-(unitHeights[unitsOnMap[i][j]->getClass()][unitsOnMap[i][j]->getSize()]),1);
+					unitsOnMap[i][j]->setCoordinates(blockMap[i][j][top-1]->getX()+(blockWidth/2)-(unitWidths[players.at(curPlayer)->getClass()][unitsOnMap[i][j]->getSize()]/2),
+						blockMap[i][j][top-1]->getY()+(blockHeight/2)-(unitHeights[players.at(curPlayer)->getClass()][unitsOnMap[i][j]->getSize()]), 1);
 					//Make a new seeds based on if the nuit made more or not
 					for(int k=0; k<num;k++){
 						struct seed newSeed;
@@ -229,11 +228,11 @@ void GameMap::draw(int camX, int camY, int camZ, double zoom)
 			}
 			//draw seeds on top of block on top of plant
 			for(unsigned int k=0; k<seeds.size(); k++){
-				if(seeds.at(k).xLoc == i && seeds.at(k).yLoc == j){
+				if(seeds.at(k).xLoc == i && seeds.at(k).yLoc == j && (top-1 == camZ || blockMap[i][j][top] == NULL)){
 					int classID = players.at(seeds.at(k).playerNum)->getClass();
 					al_draw_bitmap(seedImages[classID],
 						camX+((x-1)*blockWidth/2)+(i*blockWidth/2)-((j-1)*blockWidth/2)-(seedWidths[classID]/2),
-						camY+(camZ*blockPerceivedHeight)+((j+i+2)*(blockHeight-blockPerceivedHeight)/2)-((top)*(blockPerceivedHeight-4))-(seedHeights[classID]),0);
+						camY+blockPerceivedHeight+((j+i+2)*(blockHeight-blockPerceivedHeight)/2)-((top)*(blockPerceivedHeight-4))-(seedHeights[classID]),0);
 				}
 			}
 			//let's you see how it draws
