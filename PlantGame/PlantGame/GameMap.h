@@ -6,6 +6,7 @@
 #include "Flower.h"
 #include "Bush.h"
 #include "Player.h"
+#include "Seed.h"
 
 enum CAMERA_ANGLES {NORTH_WEST, NORTH_EAST, SOUTH_WEST, SOUTH_EAST};
 const int NUM_UNIT_TYPES = 2;	//num of units with images
@@ -20,23 +21,26 @@ class GameMap
 private:
 	unsigned int numPlayers;		//Number of players that fit on this map
 	int curPlayer;			//number of the player taking their turn
+
 	std::vector<Player*> players;	//The players in this game
-	Block *blockMap[MAX_X+1][MAX_Y+1][MAX_Z+1];	//Three dimensional game-world map. It is one bigger in each dir to make drawing easier
+	Block* blockMap[MAX_X+1][MAX_Y+1][MAX_Z+1];	//Three dimensional game-world map. It is one bigger in each dir to make drawing easier
 				//For now this is a 10x10x8 array to make it easier
-	ALLEGRO_BITMAP *blockImages[NUM_SOIL_TYPES];
+	Unit* unitsOnMap[MAX_X][MAX_Y]; //pointers to the units on the map so that game map has easier time knowing where/if units are
+							  //updates when units are added
+							  //possibly a better way to do this?
+	Seed* seedsOnMap[MAX_X][MAX_Y][MAX_PLAYERS];
+
+	ALLEGRO_BITMAP* blockImages[NUM_SOIL_TYPES];
 	ALLEGRO_BITMAP* unitImages[NUM_UNIT_TYPES][NUM_IMAGES_PER_UNIT];
 	ALLEGRO_BITMAP* seedImages[NUM_UNIT_TYPES];	//one seed image per type of unit
 	int unitWidths[NUM_UNIT_TYPES][NUM_IMAGES_PER_UNIT];
 	int unitHeights[NUM_UNIT_TYPES][NUM_IMAGES_PER_UNIT];
-	Unit* unitsOnMap[10][10]; //pointers to the units on the map so that game map has easier time knowing where/if units are
-							  //updates when units are added
-							  //possibly a better way to do this?
-	std::vector<struct seed> seeds;
 	int blockWidth;		//the width of the image
 	int blockHeight;	//the height of the image
 	int seedWidths[NUM_UNIT_TYPES];
 	int seedHeights[NUM_UNIT_TYPES];
 	int blockPerceivedHeight;	//the height that the block looks like it has in the image (if it were 3D)
+
 	int x;	//Dimension along the east-west axis
 	int y;	//Dimension along the north-south axis
 	int z;	//Dimension along the up-down axis
@@ -54,11 +58,4 @@ public:
 	void changeCamera(int dx, int dy, int dz, double dZoom);
 	void nextTurn(); //Updates units and blocks for next player's turn
 	void draw(int x, int y,int z, double zoom);	//Draws based on camera position
-};
-
-struct seed{
-	int xLoc;	//x coordinate
-	int yLoc;	//y coordinate
-	int playerNum;	//number of player who owns this seed
-					//Things like type and germinationChance are determined by the owning player
 };

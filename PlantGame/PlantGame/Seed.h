@@ -11,10 +11,13 @@ also in GameMap. Blocks may have a doesGerminate(int germChance/resilience) func
 class Seed : public Sprite
 {
 private:
-	int numOwnedBy[MAX_PLAYERS];
+	int numSeeds;
 
 public:
-	Seed() {}
+	Seed() {numSeeds = 0;}
 	~Seed() {}
-	bool hasSeeds(int playerNum) {} //Returns number of seeds 
+	bool hasSeeds() {if(numSeeds > 0) return true; return false;} //Returns number of seeds 
+	int getNumSeeds() {return numSeeds;}
+	void addSeed() {numSeeds++;}
+	void removeASeed() {numSeeds--;}
 };

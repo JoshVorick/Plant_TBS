@@ -24,7 +24,7 @@ GameMap::GameMap(int x, int y, int z)
 				if(rand() % 2 && blockMap[i][j][k-1] != NULL)		//will randomly create some as long as the block below it is soil
 					blockMap[i][j][k] = new Block(1 + rand() % 3);
 			}
-			//INITIALIZE UNITS
+			//INITIALIZE UNITS AS NULL
 			unitsOnMap[i][j] = NULL;
 		}
 	}
@@ -77,20 +77,17 @@ GameMap::GameMap(int x, int y, int z)
 				}
 			}
 			//Initialize unit coordinates
-			if(unitsOnMap[i][j] != NULL && (top-1 == z || blockMap[i][j][top] == NULL)){
+			if(unitsOnMap[i][j] != NULL){
 				unitsOnMap[i][j]->setCoordinates(((x-1)*blockWidth/2)+(i*blockWidth/2)-((j-1)*blockWidth/2)-(unitWidths[unitsOnMap[i][j]->getClass()][unitsOnMap[i][j]->getSize()]/2),
 					blockPerceivedHeight+((j+i+2)*(blockHeight-blockPerceivedHeight)/2)-((top)*(blockPerceivedHeight-4))-(unitHeights[unitsOnMap[i][j]->getClass()][unitsOnMap[i][j]->getSize()]),1);
 			}
-/*			//draw seeds on top of block on top of plant
-			for(unsigned int k=0; k<seeds.size(); k++){
-				if(seeds.at(k).xLoc == i && seeds.at(k).yLoc == j){
-					int classID = players.at(seeds.at(k).playerNum)->getClass();
-					al_draw_bitmap(seedImages[classID],
-						camX+((x-1)*blockWidth/2)+(i*blockWidth/2)-((j-1)*blockWidth/2)-(seedWidths[classID]/2),
-						camY+(camZ*blockPerceivedHeight)+((j+i+2)*(blockHeight-blockPerceivedHeight)/2)-((top)*(blockPerceivedHeight-4))-(seedHeights[classID]),0);
-				}
+			//Initialize seed and its coordinates
+			for(int k=0; k<MAX_PLAYERS; k++){
+				seedsOnMap[i][j][k] = new Seed();
+				seedsOnMap[i][j][k]->setCoordinates(((x-1)*blockWidth/2)+(i*blockWidth/2)-((j-1)*blockWidth/2)-(seedWidths[k]/2),
+						blockPerceivedHeight+((j+i+2)*(blockHeight-blockPerceivedHeight)/2)-((top)*(blockPerceivedHeight-4))-(seedHeights[k]),1);
 			}
-*/		}
+		}
 	}
 }
 
@@ -145,41 +142,49 @@ void GameMap::changeCamera(int dx, int dy, int dz, double dZoom){
 			}
 			if(unitsOnMap[i][j] != NULL)
 				unitsOnMap[i][j]->incrementCoordinates(dx, dy, dZoom);
+			for(int k=0; k<numPlayers; k++)
+				seedsOnMap[i][j][k]->incrementCoordinates(dx, dy, dZoom);
 		}
 	}
 }
 
 void GameMap::nextTurn()
 {
-
 	//Turn some seeds into units
-	for(unsigned int i=0;i<seeds.size(); i++){
-		if(!(unitsOnMap[seeds.at(i).xLoc][seeds.at(i).yLoc] != NULL) && seeds.at(i).playerNum == curPlayer && rand() % 4 == 0){	//should check germinate of block seed is on where 'rand()' is
-			addUnit(seeds.at(i).playerNum, seeds.at(i).xLoc, seeds.at(i).yLoc);
-			//delete the seed because it is now a plant!
-		}
-	}
-	//move seeds
-	for(unsigned int i=0; i<seeds.size(); i++){
-		if(seeds.at(i).xLoc < 9)
-			seeds.at(i).xLoc += rand() % 2;
-		if(seeds.at(i).xLoc > 0)
-			seeds.at(i).xLoc -= rand() % 2;
-		
-		if(seeds.at(i).yLoc < 9)
-			seeds.at(i).yLoc += rand() % 2;
-		if(seeds.at(i).yLoc > 0)
-			seeds.at(i).yLoc -= rand() % 2;
-	}
-
-	curPlayer = (curPlayer+1) % numPlayers;
-	//update units and produce their seeds
 	for(int i=0; i<x; i++){
 		for(int j=0; j<y; j++){
+			//Move the seeds
+			int numSeeds = seedsOnMap[i][j][curPlayer]->getNumSeeds();
+			for(int k=0; k<numSeeds; k++){
+				seedsOnMap[i][j][curPlayer]->removeASeed();
+				int randomNumber = rand() % 5;
+				switch(randomNumber){
+				case  0:
+					if(j<y-1)
+						seedsOnMap[i][j+1][curPlayer]->addSeed();
+					break;
+				case 1:
+					if(j>0)
+						seedsOnMap[i][j-1][curPlayer]->addSeed();
+					break;
+				case 2:
+					if(i<x-1)
+						seedsOnMap[i+1][j][curPlayer]->addSeed();
+					break;
+				case 3:
+					if(i>0)
+						seedsOnMap[i-1][j][curPlayer]->addSeed();
+					break;
+				case 4:
+					seedsOnMap[i][j][curPlayer]->addSeed();
+					break;
+				}
+			}
+			//update units and add their new seeds to board
 			if(unitsOnMap[i][j] != NULL && unitsOnMap[i][j]->getOwner() == curPlayer){
 				int num = unitsOnMap[i][j]->addMinerals();
 				if(num != -1){
-					//Update x and y, because it will be different if the unit grew
+					//Update x and y, because it will be different if the unit grew because the bitmap might change
 					int top=0;
 					for(int k=0; k<z; k++)
 						if(blockMap[i][j][k] != NULL)
@@ -189,18 +194,22 @@ void GameMap::nextTurn()
 
 					unitsOnMap[i][j]->setCoordinates(blockMap[i][j][top-1]->getX()+(blockWidth/2)-(unitWidths[players.at(curPlayer)->getClass()][unitsOnMap[i][j]->getSize()]/2),
 						blockMap[i][j][top-1]->getY()+(blockHeight/2)-(unitHeights[players.at(curPlayer)->getClass()][unitsOnMap[i][j]->getSize()]), 1);
-					//Make a new seeds based on if the nuit made more or not
-					for(int k=0; k<num;k++){
-						struct seed newSeed;
-						newSeed.playerNum = curPlayer;
-						newSeed.xLoc = i;
-						newSeed.yLoc = j;
-						seeds.push_back(newSeed);
+
+					//Make a new seeds based on if the unit made more or not
+					for(int k=0; k<num; k++){
+						seedsOnMap[i][j][curPlayer]->addSeed();
 					}
+			
 				}
+			}
+			//Turn seeds into units (randomly)
+			if(!(unitsOnMap[i][j] != NULL) && seedsOnMap[i][j][curPlayer]->hasSeeds() && rand() % 4 == 0){
+				addUnit(curPlayer, i, j);
+				seedsOnMap[i][j][curPlayer]->removeASeed();
 			}
 		}
 	}
+	curPlayer = (curPlayer+1) % numPlayers;
 }
 
 void GameMap::draw(int camX, int camY, int camZ, double zoom)
@@ -227,13 +236,9 @@ void GameMap::draw(int camX, int camY, int camZ, double zoom)
 				unitsOnMap[i][j]->draw(unitImages[unitsOnMap[i][j]->getClass()][unitsOnMap[i][j]->getSize()]);
 			}
 			//draw seeds on top of block on top of plant
-			for(unsigned int k=0; k<seeds.size(); k++){
-				if(seeds.at(k).xLoc == i && seeds.at(k).yLoc == j && (top-1 == camZ || blockMap[i][j][top] == NULL)){
-					int classID = players.at(seeds.at(k).playerNum)->getClass();
-					al_draw_bitmap(seedImages[classID],
-						camX+((x-1)*blockWidth/2)+(i*blockWidth/2)-((j-1)*blockWidth/2)-(seedWidths[classID]/2),
-						camY+blockPerceivedHeight+((j+i+2)*(blockHeight-blockPerceivedHeight)/2)-((top)*(blockPerceivedHeight-4))-(seedHeights[classID]),0);
-				}
+			for(int k=0; k<numPlayers; k++){
+				if(seedsOnMap[i][j][k]->hasSeeds())
+					seedsOnMap[i][j][k]->draw(seedImages[players.at(k)->getClass()]);
 			}
 			//let's you see how it draws
 			//al_flip_display();
