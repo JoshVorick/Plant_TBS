@@ -7,7 +7,7 @@ class Sprite{
 private:
 
 protected:
-	int x, y;
+	int x, y, width, height, frameWidth;
 	double zoom;
 	int curFrame;
 

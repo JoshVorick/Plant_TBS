@@ -19,7 +19,7 @@ const int UNEVEN_LAYERS = 1;	//layers that can have NULL spaces
 class GameMap
 {
 private:
-	unsigned int numPlayers;		//Number of players that fit on this map
+	int numPlayers;		//Number of players that fit on this map
 	int curPlayer;			//number of the player taking their turn
 
 	std::vector<Player*> players;	//The players in this game

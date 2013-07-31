@@ -14,7 +14,6 @@ class Block : public Sprite
 private:
 	//Images are held in GameMap
 	bool isHoveredOn;
-	int width, height;
 	int blockID;				//Pretty obvious -- an ID describing what type of block it is
 	int mineralsAvailable;		//How many minerals are currently available in the soil block
 	int mineralsGivenPerTurn;		//Amount given total to players, determined by Sigmoid(sum of numUnitRoots){0,1} * mineralsAvailable

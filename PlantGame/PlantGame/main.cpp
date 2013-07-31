@@ -92,13 +92,7 @@ int main()
 	{
 		ALLEGRO_EVENT ev;
 		al_wait_for_event(event_queue, &ev);	//waits for something to happen (timer, keyboard, mouse etc)
-		/*
-		Game Loop
-			-Read input
-			-Process input
-			-Update internals
-			-Render output to screen
-		*/
+
 		switch(ev.type){
 			case ALLEGRO_EVENT_DISPLAY_CLOSE:	//If the red X is pressed
 				done = true;
@@ -129,6 +123,8 @@ int main()
 				redraw = true;		//redraw goes to true every 1/60th sec, makes rendering smooth
 				break;
 			case ALLEGRO_EVENT_KEY_DOWN:	//If a key gets pressed down (NOT if a key IS down, only happens when it is first pressed down)
+				if(ev.keyboard.keycode == ALLEGRO_KEY_ESCAPE)
+					done = true;
 				processKeyDown(ev, curState);
 				break;
 			case ALLEGRO_EVENT_MOUSE_AXES:

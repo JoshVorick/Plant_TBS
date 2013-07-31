@@ -5,6 +5,6 @@
 class Bush : public Unit
 {
 public:
-	Bush();	//Sets classID to BUSH plus whatever else we come up with
+	Bush(int w, int h);	//Sets classID to BUSH plus whatever else we come up with
 	~Bush();	//Garbage collection
 };

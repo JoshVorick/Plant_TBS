@@ -51,12 +51,12 @@ GameMap::GameMap(int x, int y, int z)
 		seedHeights[i] = al_get_bitmap_height(seedImages[i]);
 	}
 	
-	unitImages[0][0] = al_load_bitmap("Bitmaps/Tree1.bmp");
-	unitImages[0][1] = al_load_bitmap("Bitmaps/Tree2.bmp");
-	unitImages[0][2] = al_load_bitmap("Bitmaps/Tree3.bmp");
-	unitImages[1][0] = al_load_bitmap("Bitmaps/Flower1.bmp");
-	unitImages[1][1] = al_load_bitmap("Bitmaps/Flower2.bmp");
-	unitImages[1][2] = al_load_bitmap("Bitmaps/Flower3.bmp");
+	unitImages[TREE][0] = al_load_bitmap("Bitmaps/Tree1.bmp");
+	unitImages[TREE][1] = al_load_bitmap("Bitmaps/Tree2.bmp");
+	unitImages[TREE][2] = al_load_bitmap("Bitmaps/Tree3.bmp");
+	unitImages[FLOWER][0] = al_load_bitmap("Bitmaps/Flower1.bmp");
+	unitImages[FLOWER][1] = al_load_bitmap("Bitmaps/Flower2.bmp");
+	unitImages[FLOWER][2] = al_load_bitmap("Bitmaps/Flower3.bmp");
 	for(int i=0;i<NUM_UNIT_TYPES;i++)
 		for(int j=0; j<NUM_IMAGES_PER_UNIT; j++)
 			al_convert_mask_to_alpha(unitImages[i][j], al_map_rgb(255,0,255)); //converts hideous magenta to transparent
@@ -114,9 +114,11 @@ void GameMap::addUnit(int player, int xLoc, int yLoc)	//This should only add ini
 {
 	//Get player's settings for their unit and adds it to unitsOnMap[x][y]
 	if(players.at(player)->getClass() == 0)
-		unitsOnMap[xLoc][yLoc] = new Tree();
+		unitsOnMap[xLoc][yLoc] = new Tree(unitWidths[TREE][0], unitHeights[TREE][0]);
 	else
-		unitsOnMap[xLoc][yLoc] = new Flower();
+		unitsOnMap[xLoc][yLoc] = new Flower(unitWidths[FLOWER][0], unitHeights[FLOWER][0]);
+	
+	unitsOnMap[xLoc][yLoc]->setOwner(player);
 
 	//SET coordinates for new block
 	//First figure out how high top block is
@@ -126,8 +128,6 @@ void GameMap::addUnit(int player, int xLoc, int yLoc)	//This should only add ini
 			top++;
 		else
 			break;
-
-	unitsOnMap[xLoc][yLoc]->setOwner(player);
 
 	//set coordinates based on block below it
 	unitsOnMap[xLoc][yLoc]->setCoordinates(blockMap[xLoc][yLoc][top-1]->getX()+(blockWidth/2)-(unitWidths[players.at(player)->getClass()][unitsOnMap[xLoc][yLoc]->getSize()]/2),
@@ -187,7 +187,7 @@ void GameMap::nextTurn()
 			}
 			//update units and add their new seeds to board
 			if(unitsOnMap[i][j] != NULL && unitsOnMap[i][j]->getOwner() == curPlayer){
-				int num = unitsOnMap[i][j]->addMinerals();
+				int num = unitsOnMap[i][j]->addMinerals(25);
 				if(num != -1){
 					//Update x and y, because it will be different if the unit grew because the bitmap might change
 					int top=0;
@@ -220,8 +220,9 @@ void GameMap::nextTurn()
 void GameMap::draw(int camX, int camY, int camZ, double zoom, ALLEGRO_FONT* font, int mouseX, int mouseY)
 {
 	ALLEGRO_DISPLAY* tempDisplay = al_get_current_display();
-	ALLEGRO_BITMAP* tempBitmap = al_create_bitmap(1920, 1080);
+	ALLEGRO_BITMAP* tempBitmap = al_create_bitmap(1920/zoom, 1080/zoom);
 	al_set_target_bitmap(tempBitmap);
+	bool drawUnitText = false;
 	//Draws all blocks that are missing a block above or in front of them
 	for(int i=0; i<x; i++){	//x
 		for(int j=0; j<y; j++){ //y{	
@@ -234,6 +235,10 @@ void GameMap::draw(int camX, int camY, int camZ, double zoom, ALLEGRO_FONT* font
 							blockMouseIsOn[0]=i;
 							blockMouseIsOn[1]=j;
 							blockMouseIsOn[2]=k;
+							if(unitsOnMap[i][j] != NULL && (top == camZ || blockMap[i][j][top+1] == NULL))
+								drawUnitText = true;
+							else
+								drawUnitText = false;
 						}
 						//al_flip_display();
 						//al_rest(0.03);
@@ -255,8 +260,12 @@ void GameMap::draw(int camX, int camY, int camZ, double zoom, ALLEGRO_FONT* font
 			//al_rest(0.03);
 		}
 	}
+	//draw text for whatever is being hovered on
 	blockMap[blockMouseIsOn[0]][blockMouseIsOn[1]][blockMouseIsOn[2]]->drawInfoBox(font);
+	if(drawUnitText)
+		unitsOnMap[blockMouseIsOn[0]][blockMouseIsOn[1]]->drawInfoBox(font);
+
 	al_set_target_bitmap(al_get_backbuffer(tempDisplay));
-	al_draw_scaled_bitmap(tempBitmap, 0, 0, 1920, 1080, 0, 0, 1920*zoom, 1080*zoom, 0);
+	al_draw_scaled_bitmap(tempBitmap, 0, 0, 1920/zoom, 1080/zoom, 0, 0, 1920, 1080, 0);
 	al_destroy_bitmap(tempBitmap);
 }

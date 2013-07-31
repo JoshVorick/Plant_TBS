@@ -74,6 +74,7 @@
     <ClCompile Include="Seed.cpp" />
     <ClCompile Include="StartMenu.cpp" />
     <ClCompile Include="Tree.cpp" />
+    <ClCompile Include="Unit.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Bitmaps\Flower1.bmp" />

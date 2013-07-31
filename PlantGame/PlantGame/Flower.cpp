@@ -1,11 +1,20 @@
 #pragma once
 #include "Flower.h"
 
-Flower::Flower()
+Flower::Flower(int w, int h)
 {
-	Unit();
+	width = w;
+	height = h;
 	classID = FLOWER;
-	level = 0;
+
+	mineralsToLevelUp = 100;
+	waterToLevelUp = 50;
+	mineralsToProduceASeed = 100;
+	waterToProduceASeed = 50;
+
+	hitPoints = 100;
+	maxHitPoints = 100;
+
 }
 
 Flower::~Flower()
