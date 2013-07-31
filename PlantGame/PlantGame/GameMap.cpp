@@ -6,6 +6,9 @@ GameMap::GameMap(int x, int y, int z)
 	this->x = x;
 	this->y = y;
 	this->z = z;
+	blockMouseIsOn[0]=0;
+	blockMouseIsOn[1]=0;
+	blockMouseIsOn[2]=0;
 	numPlayers = 2;	//Max of 2 players on this map
 	curPlayer = 0;
 
@@ -14,15 +17,26 @@ GameMap::GameMap(int x, int y, int z)
 			for(int k=0; k<z+1; k++)
 				blockMap[i][j][k] = NULL;
 
+	blockImages[0] = al_load_bitmap("Bitmaps/Soil1.bmp");
+	blockImages[1] = al_load_bitmap("Bitmaps/Soil2.bmp");
+	blockImages[2] = al_load_bitmap("Bitmaps/Soil3.bmp");
+	blockImages[3] = al_load_bitmap("Bitmaps/Soil4.bmp");
+	for(int i=0;i<NUM_SOIL_TYPES;i++)
+		al_convert_mask_to_alpha(blockImages[i], al_map_rgb(255,0,255)); //converts hideous magenta to transparent
+
+	blockWidth = al_get_bitmap_width(blockImages[0]);
+	blockHeight = al_get_bitmap_height(blockImages[0])-1; //-1 because it looks better;
+
+	blockPerceivedHeight = 32;
 	for(int i=0; i<x; i++){	//x
 		for(int j=0; j<y; j++) {//y
 			//INITIALIZE BLOCKS
 			for(int k=0; k<(z-UNEVEN_LAYERS); k++) {//z
-				blockMap[i][j][k] = new Block(1 + rand() % 3);	//Bottom layers are solid/whole with random soil type
+				blockMap[i][j][k] = new Block(1 + rand() % 3, blockWidth, blockHeight);	//Bottom layers are solid/whole with random soil type
 			}
 			for(int k=z-UNEVEN_LAYERS; k<z; k++){ //z
 				if(rand() % 2 && blockMap[i][j][k-1] != NULL)		//will randomly create some as long as the block below it is soil
-					blockMap[i][j][k] = new Block(1 + rand() % 3);
+					blockMap[i][j][k] = new Block(1 + rand() % 3, blockWidth, blockHeight);
 			}
 			//INITIALIZE UNITS AS NULL
 			unitsOnMap[i][j] = NULL;
@@ -36,13 +50,6 @@ GameMap::GameMap(int x, int y, int z)
 		seedWidths[i] = al_get_bitmap_width(seedImages[i]);
 		seedHeights[i] = al_get_bitmap_height(seedImages[i]);
 	}
-
-	blockImages[0] = al_load_bitmap("Bitmaps/Soil1.bmp");
-	blockImages[1] = al_load_bitmap("Bitmaps/Soil2.bmp");
-	blockImages[2] = al_load_bitmap("Bitmaps/Soil3.bmp");
-	blockImages[3] = al_load_bitmap("Bitmaps/Soil4.bmp");
-	for(int i=0;i<NUM_SOIL_TYPES;i++)
-		al_convert_mask_to_alpha(blockImages[i], al_map_rgb(255,0,255)); //converts hideous magenta to transparent
 	
 	unitImages[0][0] = al_load_bitmap("Bitmaps/Tree1.bmp");
 	unitImages[0][1] = al_load_bitmap("Bitmaps/Tree2.bmp");
@@ -54,9 +61,6 @@ GameMap::GameMap(int x, int y, int z)
 		for(int j=0; j<NUM_IMAGES_PER_UNIT; j++)
 			al_convert_mask_to_alpha(unitImages[i][j], al_map_rgb(255,0,255)); //converts hideous magenta to transparent
 
-	blockWidth = al_get_bitmap_width(blockImages[0]);
-	blockHeight = al_get_bitmap_height(blockImages[0])-1; //-1 because it looks better;
-	blockPerceivedHeight = 32;
 
 	for(int i=0;i<NUM_UNIT_TYPES;i++){
 		for(int j=0;j<NUM_IMAGES_PER_UNIT;j++){
@@ -89,6 +93,7 @@ GameMap::GameMap(int x, int y, int z)
 			}
 		}
 	}
+
 }
 
 GameMap::~GameMap()
@@ -212,7 +217,7 @@ void GameMap::nextTurn()
 	curPlayer = (curPlayer+1) % numPlayers;
 }
 
-void GameMap::draw(int camX, int camY, int camZ, double zoom)
+void GameMap::draw(int camX, int camY, int camZ, double zoom, ALLEGRO_FONT* font, int mouseX, int mouseY)
 {
 	ALLEGRO_DISPLAY* tempDisplay = al_get_current_display();
 	ALLEGRO_BITMAP* tempBitmap = al_create_bitmap(1920, 1080);
@@ -225,6 +230,11 @@ void GameMap::draw(int camX, int camY, int camZ, double zoom)
 				if(blockMap[i][j][k] != NULL){
 					if(k==camZ-1 || !(blockMap[i+1][j][k] != NULL && blockMap[i][j+1][k] != NULL && blockMap[i][j][k+1] != NULL)){
 						blockMap[i][j][k]->draw(blockImages[blockMap[i][j][k]->getBitmap()]);
+						if(blockMap[i][j][k]->isHoveringOnBlock(mouseX, mouseY)){
+							blockMouseIsOn[0]=i;
+							blockMouseIsOn[1]=j;
+							blockMouseIsOn[2]=k;
+						}
 						//al_flip_display();
 						//al_rest(0.03);
 					}
@@ -237,7 +247,7 @@ void GameMap::draw(int camX, int camY, int camZ, double zoom)
 			}
 			//draw seeds on top of block on top of plant
 			for(int k=0; k<numPlayers; k++){
-				if(seedsOnMap[i][j][k]->hasSeeds())
+				if(seedsOnMap[i][j][k]->hasSeeds() && (top-1 == camZ || blockMap[i][j][top] == NULL))
 					seedsOnMap[i][j][k]->draw(seedImages[players.at(k)->getClass()]);
 			}
 			//let's you see how it draws
@@ -245,6 +255,7 @@ void GameMap::draw(int camX, int camY, int camZ, double zoom)
 			//al_rest(0.03);
 		}
 	}
+	blockMap[blockMouseIsOn[0]][blockMouseIsOn[1]][blockMouseIsOn[2]]->drawInfoBox(font);
 	al_set_target_bitmap(al_get_backbuffer(tempDisplay));
 	al_draw_scaled_bitmap(tempBitmap, 0, 0, 1920, 1080, 0, 0, 1920*zoom, 1080*zoom, 0);
 	al_destroy_bitmap(tempBitmap);

@@ -100,7 +100,7 @@ int Game::update()
 
 void Game::draw()
 {
-	map->draw(camX,camY,camZ,zoom);	//draws map
+	map->draw(camX,camY,camZ,zoom,font36, mouseX, mouseY);	//draws map
 	al_draw_text(font36, al_map_rgb(100,0,100), 25,25,0, "Press Space to go back to the start menu");
 	al_draw_text(font36, al_map_rgb(100,0,100), 25,60,0, "This is the GAME.");
 	al_draw_text(font36, al_map_rgb(100,0,100), 25,95,0, "Use WASD and scroll");

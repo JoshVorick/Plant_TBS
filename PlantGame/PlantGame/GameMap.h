@@ -33,6 +33,7 @@ private:
 	ALLEGRO_BITMAP* blockImages[NUM_SOIL_TYPES];
 	ALLEGRO_BITMAP* unitImages[NUM_UNIT_TYPES][NUM_IMAGES_PER_UNIT];
 	ALLEGRO_BITMAP* seedImages[NUM_UNIT_TYPES];	//one seed image per type of unit
+	int blockMouseIsOn[3]; //3 members hold x,y,z of block
 	int unitWidths[NUM_UNIT_TYPES][NUM_IMAGES_PER_UNIT];
 	int unitHeights[NUM_UNIT_TYPES][NUM_IMAGES_PER_UNIT];
 	int blockWidth;		//the width of the image
@@ -55,7 +56,8 @@ public:
 	int getCurPlayerNum() {return curPlayer;}
 	int getNumPlayers() {return players.size();}
 
+	void updateMouseLocation(int mouseX, int mouseY);
 	void changeCamera(int dx, int dy, int dz, double dZoom);
 	void nextTurn(); //Updates units and blocks for next player's turn
-	void draw(int x, int y,int z, double zoom);	//Draws based on camera position
+	void draw(int x, int y,int z, double zoom, ALLEGRO_FONT* font, int mouseX, int mouseY);	//Draws based on camera position
 };

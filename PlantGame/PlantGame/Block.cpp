@@ -1,10 +1,12 @@
 #pragma once
 #include "Block.h"
 
-Block::Block(int id)	//Initializes values minearls/water based on ID passed
+Block::Block(int id, int w, int h)	//Initializes values minearls/water based on ID passed
 {
 	Sprite();
 	blockID = id;
+	width = w;
+	height = h;
 	switch(id){
 		case 1:
 			mineralsAvailable = 250;
@@ -45,9 +47,15 @@ Block::~Block()	//Does whatever garbage collection is needed
 {
 }
 
-int Block::getBitmap()	//Returns the bitmap so the block can be drawn
-{
-	return blockID;
+bool Block::isHoveringOnBlock(int mouseX, int mouseY){
+	mouseX-=width/2;
+	mouseY-=height/2;
+	if(abs(mouseX-x) + abs(mouseY-y) < width/2){
+		isHoveredOn=true;
+		return true;
+	}
+	isHoveredOn=false;
+	return false;
 }
 
 double Block::giveUnitMinerals(int unitID)	//See function definition for explanation
@@ -79,4 +87,15 @@ void Block::replenishResources()
 {
 	mineralsAvailable += mineralsReplenishedPerTurn;
 	waterAvailable += waterReplenishedPerTurn;
+}
+
+void Block::drawInfoBox(ALLEGRO_FONT* font){
+	al_draw_textf(font, al_map_rgb(25, 200, 100), x+50, y+25, 0, "Minerals: %i Minerals Per Turn: %i", mineralsAvailable, mineralsReplenishedPerTurn);
+}
+
+void Block::draw(ALLEGRO_BITMAP* image){
+	if(!isHoveredOn)
+		al_draw_bitmap(image, x, y, 0);
+	else
+		al_draw_tinted_bitmap(image, al_map_rgb(100,100,100), x, y, 0);
 }
