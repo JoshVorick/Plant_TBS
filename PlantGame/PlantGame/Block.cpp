@@ -51,7 +51,6 @@ bool Block::isHoveringOnBlock(int mouseX, int mouseY){
 	mouseX-=width/2;
 	mouseY-=height/2;
 	if(abs(mouseX-x) + abs(mouseY-y) < width/2){
-		isHoveredOn=true;
 		return true;
 	}
 	isHoveredOn=false;
@@ -86,10 +85,13 @@ double Block::giveUnitWater(int unitID)
 void Block::replenishResources()
 {
 	mineralsAvailable += mineralsReplenishedPerTurn;
+	if(mineralsAvailable > 300) mineralsAvailable = 300;
 	waterAvailable += waterReplenishedPerTurn;
+	if(waterAvailable > 300) waterAvailable = 300;
 }
 
 void Block::drawInfoBox(ALLEGRO_FONT* font){
+	isHoveredOn = true;
 	al_draw_textf(font, al_map_rgb(25, 200, 100), x+width, y, 0, "Minerals: %i Minerals Per Turn: %i", mineralsAvailable, mineralsReplenishedPerTurn);
 }
 
@@ -98,4 +100,5 @@ void Block::draw(ALLEGRO_BITMAP* image){
 		al_draw_bitmap(image, x, y, 0);
 	else
 		al_draw_tinted_bitmap(image, al_map_rgb(100,100,100), x, y, 0);
+	isHoveredOn = false;
 }

@@ -212,6 +212,11 @@ void GameMap::nextTurn()
 				addUnit(curPlayer, i, j);
 				seedsOnMap[i][j][curPlayer]->removeASeed();
 			}
+			//Have blocks gain respective resources for this turn
+			for(int k=0; k<z; k++){
+				if(blockMap[i][j][k] != NULL)
+					blockMap[i][j][k]->replenishResources();
+			}
 		}
 	}
 	curPlayer = (curPlayer+1) % numPlayers;

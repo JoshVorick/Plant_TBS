@@ -5,9 +5,12 @@
 #include <string>
 #include "Sprite.h"
 
+#define NUM_SOIL_TYPES 4
+#define MAX_PLAYERS 2
+#define MAX_MINERALS 300
+#define MAX_MINERALS 300
+
 enum blockIDS {SOIL1, SOIL2, SOIL3, SOIL4}; //AIR is NULL pointer, see GameMap
-const int NUM_SOIL_TYPES = 4;
-const int MAX_PLAYERS = 2;
 
 class Block : public Sprite
 {
