@@ -15,10 +15,12 @@ private:
 	int score;
 	int classID;
 	EvoTree* evoTree;
+	std::vector<int> unitsOwned;
 
 public:
 	Player();	//Takes care of initializing the player
 	~Player();	//Garbage collection
+	void addUnit(int unitID) {unitsOwned.push_back(unitID);}
 	void setName(std::string name) {playerName = name;}	//Sets the player's name
 	void setClass(int classNum) {classID = classNum;}
 	int getClass() {return classID;}

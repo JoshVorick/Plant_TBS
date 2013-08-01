@@ -11,9 +11,6 @@
 enum CAMERA_ANGLES {NORTH_WEST, NORTH_EAST, SOUTH_WEST, SOUTH_EAST};
 const int NUM_UNIT_TYPES = 2;	//num of units with images
 const int NUM_IMAGES_PER_UNIT = 3;	//Number of images each unit has (sapling, budding, full-grown would be 3)
-const int MAX_X = 10;
-const int MAX_Y = 10;
-const int MAX_Z = 8;
 const int UNEVEN_LAYERS = 1;	//layers that can have NULL spaces
 
 class GameMap
@@ -21,8 +18,9 @@ class GameMap
 private:
 	int numPlayers;		//Number of players that fit on this map
 	int curPlayer;			//number of the player taking their turn
-
+	int nextUnitID; //ID to be given to next unit
 	std::vector<Player*> players;	//The players in this game
+	std::vector<Unit*> units; //array of initialized units
 	Block* blockMap[MAX_X+1][MAX_Y+1][MAX_Z+1];	//Three dimensional game-world map. It is one bigger in each dir to make drawing easier
 				//For now this is a 10x10x8 array to make it easier
 	Unit* unitsOnMap[MAX_X][MAX_Y]; //pointers to the units on the map so that game map has easier time knowing where/if units are

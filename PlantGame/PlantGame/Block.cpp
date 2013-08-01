@@ -9,36 +9,28 @@ Block::Block(int id, int w, int h)	//Initializes values minearls/water based on 
 	height = h;
 	switch(id){
 		case 1:
-			mineralsAvailable = 250;
-			mineralsGivenPerTurn = 0;	//No roots yet, so none given
-			mineralsReplenishedPerTurn = 100;
-			waterAvailable = 100;
-			waterGivenPerTurn = 0;
-			waterReplenishedPerTurn = 30;
+			mineralsAvailable = 25;
+			mineralsReplenishedPerTurn = 10;
+			waterAvailable = 10;
+			waterReplenishedPerTurn = 3;
 			break;
 		case 2:
-			mineralsAvailable = 50;
-			mineralsGivenPerTurn = 0;	//No roots yet, so none given
-			mineralsReplenishedPerTurn = 150;
-			waterAvailable = 150;
-			waterGivenPerTurn = 0;
-			waterReplenishedPerTurn = 50;
+			mineralsAvailable = 5;
+			mineralsReplenishedPerTurn = 15;
+			waterAvailable = 15;
+			waterReplenishedPerTurn = 5;
 			break;
 		case 3:
-			mineralsAvailable = 150;
-			mineralsGivenPerTurn = 0;	//No roots yet, so none given
-			mineralsReplenishedPerTurn = 125;
-			waterAvailable = 75;
-			waterGivenPerTurn = 0;
-			waterReplenishedPerTurn = 30;
+			mineralsAvailable = 15;
+			mineralsReplenishedPerTurn = 12;
+			waterAvailable = 7;
+			waterReplenishedPerTurn = 3;
 			break;
 		case 4:
-			mineralsAvailable = 350;
-			mineralsGivenPerTurn = 0;	//No roots yet, so none given
-			mineralsReplenishedPerTurn = 80;
-			waterAvailable = 10;
-			waterGivenPerTurn = 0;
-			waterReplenishedPerTurn = 20;
+			mineralsAvailable = 35;
+			mineralsReplenishedPerTurn = 8;
+			waterAvailable = 1;
+			waterReplenishedPerTurn = 2;
 			break;
 	}
 }
@@ -47,52 +39,54 @@ Block::~Block()	//Does whatever garbage collection is needed
 {
 }
 
+void Block::recalculatePercentages(){
+
+}
+
 bool Block::isHoveringOnBlock(int mouseX, int mouseY){
 	mouseX-=width/2;
 	mouseY-=height/2;
-	if(abs(mouseX-x) + abs(mouseY-y) < width/2){
+	if(abs(mouseX-x) + abs(mouseY-y) < width/2-16){
 		return true;
 	}
 	isHoveredOn=false;
 	return false;
 }
 
+void Block::addRoots(int unitID){
+	numUnitRoots[unitID] = 10;
+	percentToGive[unitID] = 0.9;
+	recalculatePercentages();
+}
+
+void Block::growRoots(int unitID, int amtToGrow){
+	numUnitRoots[unitID] += amtToGrow;
+	recalculatePercentages();
+}
+
 double Block::giveUnitMinerals(int unitID)	//See function definition for explanation
 {
-	/*	
-		Each player will be assigned a number
-		Say there are four players in a game, they will be 0 through 3, taking turns in that order
-		This gives player number playerNum the percentage of the resources they are owed
-		It also deducts the amount from what is available to the block
-		
-		The materials will be given to the player like this:
-		Player.addMinerals(someBlock.givePlayerMinerals(Player.getPlayerNumber()));
-	*/
-	double percentage = numUnitRoots[unitID];
-	double amountToGive = percentage * mineralsGivenPerTurn;
-	mineralsAvailable -= amountToGive;
-	return amountToGive;
+	int amtToGive = percentToGive[unitID] * mineralsAvailable;
+	mineralsAvailable -= amtToGive;
+	return amtToGive;
 }
 
 double Block::giveUnitWater(int unitID)
 {
-	double percentage = numUnitRoots[unitID];
-	double amountToGive = percentage * waterGivenPerTurn;
-	waterAvailable -= amountToGive;
-	return amountToGive;
+	return -1;
 }
 
 void Block::replenishResources()
 {
 	mineralsAvailable += mineralsReplenishedPerTurn;
-	if(mineralsAvailable > 300) mineralsAvailable = 300;
+	if(mineralsAvailable > MAX_MINERALS) mineralsAvailable = MAX_MINERALS;
 	waterAvailable += waterReplenishedPerTurn;
-	if(waterAvailable > 300) waterAvailable = 300;
+	if(waterAvailable > MAX_WATER) waterAvailable = MAX_WATER;
 }
 
 void Block::drawInfoBox(ALLEGRO_FONT* font){
 	isHoveredOn = true;
-	al_draw_textf(font, al_map_rgb(25, 200, 100), x+width, y, 0, "Minerals: %i Minerals Per Turn: %i", mineralsAvailable, mineralsReplenishedPerTurn);
+	al_draw_textf(font, al_map_rgb(25, 200, 100), 25, 200, 0, "Minerals: %i Minerals Per Turn: %i", mineralsAvailable, mineralsReplenishedPerTurn);
 }
 
 void Block::draw(ALLEGRO_BITMAP* image){

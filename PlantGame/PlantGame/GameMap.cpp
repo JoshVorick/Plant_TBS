@@ -6,6 +6,7 @@ GameMap::GameMap(int x, int y, int z)
 	this->x = x;
 	this->y = y;
 	this->z = z;
+	nextUnitID = 0;
 	blockMouseIsOn[0]=0;
 	blockMouseIsOn[1]=0;
 	blockMouseIsOn[2]=0;
@@ -117,7 +118,11 @@ void GameMap::addUnit(int player, int xLoc, int yLoc)	//This should only add ini
 		unitsOnMap[xLoc][yLoc] = new Tree(unitWidths[TREE][0], unitHeights[TREE][0]);
 	else
 		unitsOnMap[xLoc][yLoc] = new Flower(unitWidths[FLOWER][0], unitHeights[FLOWER][0]);
-	
+
+	//Add unit to vector of initialized units and add ID to player's list of units
+	units.push_back(unitsOnMap[xLoc][yLoc]);
+	unitsOnMap[xLoc][yLoc]->setID(nextUnitID);
+	players.at(player)->addUnit(nextUnitID);
 	unitsOnMap[xLoc][yLoc]->setOwner(player);
 
 	//SET coordinates for new block
@@ -132,6 +137,10 @@ void GameMap::addUnit(int player, int xLoc, int yLoc)	//This should only add ini
 	//set coordinates based on block below it
 	unitsOnMap[xLoc][yLoc]->setCoordinates(blockMap[xLoc][yLoc][top-1]->getX()+(blockWidth/2)-(unitWidths[players.at(player)->getClass()][unitsOnMap[xLoc][yLoc]->getSize()]/2),
 		blockMap[xLoc][yLoc][top-1]->getY()+(blockHeight/2)-(unitHeights[players.at(player)->getClass()][unitsOnMap[xLoc][yLoc]->getSize()]), 1);
+
+	unitsOnMap[xLoc][yLoc]->setBlockMap(blockMap, xLoc, yLoc);
+	//increment ID so next unit will have a unique one
+	nextUnitID++;
 }
 
 void GameMap::changeCamera(int dx, int dy, int dz, double dZoom){
@@ -186,26 +195,27 @@ void GameMap::nextTurn()
 				}
 			}
 			//update units and add their new seeds to board
-			if(unitsOnMap[i][j] != NULL && unitsOnMap[i][j]->getOwner() == curPlayer){
-				int num = unitsOnMap[i][j]->addMinerals(25);
+			if(unitsOnMap[i][j] != NULL){
+				int num = unitsOnMap[i][j]->addMinerals();
 				if(num != -1){
 					//Update x and y, because it will be different if the unit grew because the bitmap might change
 					int top=0;
-					for(int k=0; k<z; k++)
+					for(int k=0; k<z; k++){
 						if(blockMap[i][j][k] != NULL)
 							top++;
 						else
 							break;
-
-					unitsOnMap[i][j]->setCoordinates(blockMap[i][j][top-1]->getX()+(blockWidth/2)-(unitWidths[players.at(curPlayer)->getClass()][unitsOnMap[i][j]->getSize()]/2),
-						blockMap[i][j][top-1]->getY()+(blockHeight/2)-(unitHeights[players.at(curPlayer)->getClass()][unitsOnMap[i][j]->getSize()]), 1);
+					}
+					unitsOnMap[i][j]->setCoordinates(blockMap[i][j][top-1]->getX()+(blockWidth/2)-(unitWidths[players.at(unitsOnMap[i][j]->getOwner())->getClass()][unitsOnMap[i][j]->getSize()]/2),
+						blockMap[i][j][top-1]->getY()+(blockHeight/2)-(unitHeights[players.at(unitsOnMap[i][j]->getOwner())->getClass()][unitsOnMap[i][j]->getSize()]), 1);
 
 					//Make a new seeds based on if the unit made more or not
-					for(int k=0; k<num; k++){
-						seedsOnMap[i][j][curPlayer]->addSeed();
+					if(unitsOnMap[i][j]->getOwner() == curPlayer){
+						for(int k=0; k<num; k++){
+							seedsOnMap[i][j][curPlayer]->addSeed();
+						}
 					}
-			
-				}
+				} 		
 			}
 			//Turn seeds into units (randomly)
 			if(!(unitsOnMap[i][j] != NULL) && seedsOnMap[i][j][curPlayer]->hasSeeds() && rand() % 4 == 0){
@@ -266,11 +276,12 @@ void GameMap::draw(int camX, int camY, int camZ, double zoom, ALLEGRO_FONT* font
 		}
 	}
 	//draw text for whatever is being hovered on
+	al_set_target_bitmap(al_get_backbuffer(tempDisplay));
+	al_draw_scaled_bitmap(tempBitmap, 0, 0, 1920/zoom, 1080/zoom, 0, 0, 1920, 1080, 0);
+	al_destroy_bitmap(tempBitmap);
+	//draw after so it doesn't get scaled with zoom
 	blockMap[blockMouseIsOn[0]][blockMouseIsOn[1]][blockMouseIsOn[2]]->drawInfoBox(font);
 	if(drawUnitText)
 		unitsOnMap[blockMouseIsOn[0]][blockMouseIsOn[1]]->drawInfoBox(font);
 
-	al_set_target_bitmap(al_get_backbuffer(tempDisplay));
-	al_draw_scaled_bitmap(tempBitmap, 0, 0, 1920/zoom, 1080/zoom, 0, 0, 1920, 1080, 0);
-	al_destroy_bitmap(tempBitmap);
 }
