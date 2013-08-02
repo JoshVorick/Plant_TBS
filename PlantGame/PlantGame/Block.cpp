@@ -1,8 +1,7 @@
 #pragma once
 #include "Block.h"
 
-Block::Block(int id, int w, int h)	//Initializes values minearls/water based on ID passed
-{
+Block::Block(int id, int w, int h){
 	Sprite();
 	blockID = id;
 	width = w;
@@ -35,7 +34,7 @@ Block::Block(int id, int w, int h)	//Initializes values minearls/water based on 
 	}
 }
 
-Block::~Block()	//Does whatever garbage collection is needed
+Block::~Block()
 {
 }
 
@@ -64,7 +63,7 @@ void Block::growRoots(int unitID, int amtToGrow){
 	recalculatePercentages();
 }
 
-double Block::giveUnitMinerals(int unitID)	//See function definition for explanation
+double Block::giveUnitMinerals(int unitID)
 {
 	int amtToGive = percentToGive[unitID] * mineralsAvailable;
 	mineralsAvailable -= amtToGive;

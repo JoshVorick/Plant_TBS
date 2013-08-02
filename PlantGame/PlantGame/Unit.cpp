@@ -52,10 +52,19 @@ int Unit::addMinerals(){
 	mineralsStored += mineralsToAdd;
 	if(mineralsStored >= mineralsToLevelUp){
 		mineralsStored -= mineralsToLevelUp;
-		seeds += 1;
-		level++;
-		if(level % 2 && size < 2)
+		if(level % 2 && size < 2){
 			size++;
+			seeds += 1;
+		}
+		for(int k=MAX_Z; k>=level; k--){
+			if(blockMap[xLoc][yLoc][k] != NULL){
+				hasRootsIn.push_back(blockMap[xLoc][yLoc][k-level]);
+				//Tell the block below that this unit has roots in it
+				hasRootsIn.at(level)->addRoots(unitID);
+				break;
+			}
+		}
+		level++;
 	}
 	return seeds;
 }
