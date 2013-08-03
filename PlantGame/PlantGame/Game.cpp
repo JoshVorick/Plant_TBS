@@ -69,12 +69,13 @@ void Game::keyPressMinus()
 
 void Game::keyPressEnter()
 {
-	map->nextTurn();
+	if(gameTime > 60)
+		exitToStart = true;
 }
 
 void Game::keyPressSpace()
 {
-	exitToStart = true;
+	map->nextTurn();
 }
 
 void Game::scroll(int dz)
@@ -101,15 +102,8 @@ int Game::update()
 void Game::draw()
 {
 	map->draw(camX,camY,camZ,zoom,font36, mouseX, mouseY);	//draws map
-	al_draw_text(font36, al_map_rgb(100,0,100), 25,25,0, "Press Space to go back to the start menu");
-	al_draw_text(font36, al_map_rgb(100,0,100), 25,60,0, "This is the GAME.");
-	al_draw_text(font36, al_map_rgb(100,0,100), 25,95,0, "Use WASD and scroll");
-	al_draw_text(font36, al_map_rgb(150,50,150), 25, 130, 0, (map->getPlayers().at(map->getCurPlayerNum())->getName()).c_str());
-	//al_draw_textf(font36, al_map_rgb(150,50,150), 25, 130, 0, "%i", map->getCurPlayerNum());
-	//draw players
-	std::vector<Player*> players = map->getPlayers();
-	al_draw_textf(font36, al_map_rgb(255,255,255), windowWidth/2, windowHeight/2-35, ALLEGRO_ALIGN_CENTRE, "%i Player(s)", players.size());
-
-	for(unsigned int i=0; i<players.size(); i++)
-		al_draw_textf(font36, al_map_rgb(255,255,0), windowWidth/2, windowHeight/2 + (35*i), ALLEGRO_ALIGN_CENTRE, (char*)(players.at(i)->getName().c_str()));
+	al_draw_text(font36, al_map_rgb(0,255,0), 25, 25, 0, "Use SPACE to cycle turns");
+	al_draw_text(font36, al_map_rgb(0,255,0), 25, 60, 0, "Press ENTER to go to start menu");
+	al_draw_text(font36, al_map_rgb(50,150,50), 25,95,0, "Use WASD and scroll");
+	al_draw_text(font36, al_map_rgb(60,220,60), 25, 130, 0, (map->getPlayers().at(map->getCurPlayerNum())->getName()).c_str());
 }

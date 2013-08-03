@@ -37,11 +37,11 @@ void Unit::setBlockMap(Block* blocks[MAX_X+1][MAX_Y+1][MAX_Z+1], int unitX, int 
 	for(int k=MAX_Z; k>0; k--){
 		if(blockMap[xLoc][yLoc][k] != NULL){
 			hasRootsIn.push_back(blockMap[xLoc][yLoc][k]);
+			//Tell the block below that this unit has roots in it
+			hasRootsIn.at(0)->addRoots(unitID);
 			break;
 		}
 	}
-	//Tell the block below that this unit has roots in it
-	hasRootsIn.at(0)->addRoots(unitID);
 }
 
 int Unit::addMinerals(){
@@ -57,8 +57,9 @@ int Unit::addMinerals(){
 			seeds += 1;
 		}
 		for(int k=MAX_Z; k>=level; k--){
-			if(blockMap[xLoc][yLoc][k] != NULL){
+			if(blockMap[xLoc][yLoc][k-level] != NULL){
 				hasRootsIn.push_back(blockMap[xLoc][yLoc][k-level]);
+				blockMap[xLoc][yLoc][k-level] = NULL; //This way, this block won't be added again
 				//Tell the block below that this unit has roots in it
 				hasRootsIn.at(level)->addRoots(unitID);
 				break;

@@ -74,6 +74,7 @@ int main()
 	load bitmaps, audio, font, etc
 	*/
 	curState = new StartMenu();	//sets first state to start menu
+	curState->setwindowSize(windowWidth, windowHeight);
 
 	timer = al_create_timer(1.0/FPS);
 	event_queue = al_create_event_queue();			//create event queue, then register all sources sp ot works
@@ -100,6 +101,9 @@ int main()
 			case ALLEGRO_EVENT_TIMER:			//Timer ticks (happens 60 times/sec)
 				switch(curState->update()){		//updates game and checks to see if it needs to change state
 					case -1:					//If -1 (usually will be), breaks so it doesn't go through all other cases
+						break;
+					case 0:
+						done = true;
 						break;
 					case 1://start GameLobby()
 						delete curState;		//prevent memory leakaage, deletes old GameState
@@ -131,10 +135,12 @@ int main()
 				curState->setMousePos((ev.mouse.x * WIDTH) / windowWidth, (ev.mouse.y * HEIGHT) / windowHeight);
 				curState->scroll(ev.mouse.dz);	//dz is the change in scroll wheel position
 				break;
+			case ALLEGRO_EVENT_MOUSE_BUTTON_DOWN:
+				curState->mouseDown();
+				break;
 			case ALLEGRO_EVENT_DISPLAY_RESIZE:
 				windowWidth = ev.display.width;
 				windowHeight = ev.display.height;
-				curState->setwindowSize(windowWidth, windowHeight);
 				break;
 		}
 		if(redraw & al_is_event_queue_empty(event_queue)){

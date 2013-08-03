@@ -34,6 +34,7 @@ public:
 	void virtual keyPressMinus() {}
 	void virtual keyPressSpace() {}
 	void virtual keyPressEnter() {}
+	void virtual mouseDown() {}
 	void virtual scroll(int dz) {}
 
 	void virtual addMap(GameMap* newMap) {map = newMap;}	//adds vector of players to the class

@@ -16,7 +16,7 @@ private:
 public:
 	Seed() {numSeeds = 0;}
 	~Seed() {}
-	bool hasSeeds() {if(numSeeds > 0) return true; return false;} //Returns number of seeds 
+	bool hasSeeds() {if(numSeeds > 0) return true; return false;}
 	int getNumSeeds() {return numSeeds;}
 	void addSeed() {numSeeds++;}
 	void removeASeed() {numSeeds--;}

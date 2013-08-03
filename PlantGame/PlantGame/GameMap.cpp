@@ -86,12 +86,6 @@ GameMap::GameMap(int x, int y, int z)
 				unitsOnMap[i][j]->setCoordinates(((x-1)*blockWidth/2)+(i*blockWidth/2)-((j-1)*blockWidth/2)-(unitWidths[unitsOnMap[i][j]->getClass()][unitsOnMap[i][j]->getSize()]/2),
 					blockPerceivedHeight+((j+i+2)*(blockHeight-blockPerceivedHeight)/2)-((top)*(blockPerceivedHeight-4))-(unitHeights[unitsOnMap[i][j]->getClass()][unitsOnMap[i][j]->getSize()]),1);
 			}
-			//Initialize seed and its coordinates
-			for(int k=0; k<MAX_PLAYERS; k++){
-				seedsOnMap[i][j][k] = new Seed();
-				seedsOnMap[i][j][k]->setCoordinates(((x-1)*blockWidth/2)+(i*blockWidth/2)-((j-1)*blockWidth/2)-(seedWidths[k]/2),
-						blockPerceivedHeight+((j+i+2)*(blockHeight-blockPerceivedHeight)/2)-((top)*(blockPerceivedHeight-4))-(seedHeights[k]),1);
-			}
 		}
 	}
 
@@ -106,8 +100,24 @@ bool GameMap::addPlayer(Player* newPlayer)
 {
 	if(players.size() < numPlayers)
 		players.push_back(newPlayer);
-	else 
+	else
 		return false;
+	if(players.size() == numPlayers){
+		//Initialize seed and its coordinates
+		for(int i=0; i<x; i++)
+			for(int j=0; j<y; j++){			
+				int top=0;
+				for(int k=0; k<z; k++){
+					if(blockMap[i][j][k] != NULL)
+						top++;
+				}
+				for(int k=0; k<MAX_PLAYERS; k++){
+					seedsOnMap[i][j][k] = new Seed();
+					seedsOnMap[i][j][k]->setCoordinates(((x-1)*blockWidth/2)+(i*blockWidth/2)-((j-1)*blockWidth/2)-(seedWidths[players.at(k)->getClass()]/2),
+							blockPerceivedHeight+((j+i+2)*(blockHeight-blockPerceivedHeight)/2)-((top)*(blockPerceivedHeight-4))-(seedHeights[players.at(k)->getClass()]),1);
+				}
+			}
+	}
 	return true;
 }
 
@@ -168,37 +178,39 @@ void GameMap::nextTurn()
 	for(int i=0; i<x; i++){
 		for(int j=0; j<y; j++){
 			//Move the seeds
-			int numSeeds = seedsOnMap[i][j][curPlayer]->getNumSeeds();
-			for(int k=0; k<numSeeds; k++){
-				seedsOnMap[i][j][curPlayer]->removeASeed();
-				int randomNumber = rand() % 5;
-				switch(randomNumber){
-				case  0:
-					if(j<y-1)
-						seedsOnMap[i][j+1][curPlayer]->addSeed();
-					break;
-				case 1:
-					if(j>0)
-						seedsOnMap[i][j-1][curPlayer]->addSeed();
-					break;
-				case 2:
-					if(i<x-1)
-						seedsOnMap[i+1][j][curPlayer]->addSeed();
-					break;
-				case 3:
-					if(i>0)
-						seedsOnMap[i-1][j][curPlayer]->addSeed();
-					break;
-				case 4:
-					seedsOnMap[i][j][curPlayer]->addSeed();
-					break;
+			if(seedsOnMap[i][j][curPlayer]->hasSeeds()){
+				int numSeeds = seedsOnMap[i][j][curPlayer]->getNumSeeds();
+				for(int k=0; k<numSeeds; k++){
+					seedsOnMap[i][j][curPlayer]->removeASeed();
+					int randomNumber = rand() % 5;
+					switch(randomNumber){
+					case  0:
+						if(j<y-1)
+							seedsOnMap[i][j+1][curPlayer]->addSeed();
+						break;
+					case 1:
+						if(j>0)
+							seedsOnMap[i][j-1][curPlayer]->addSeed();
+						break;
+					case 2:
+						if(i<x-1)
+							seedsOnMap[i+1][j][curPlayer]->addSeed();
+						break;
+					case 3:
+						if(i>0)
+							seedsOnMap[i-1][j][curPlayer]->addSeed();
+						break;
+					case 4:
+						seedsOnMap[i][j][curPlayer]->addSeed();
+						break;
+					}
 				}
 			}
 			//update units and add their new seeds to board
 			if(unitsOnMap[i][j] != NULL){
 				int num = unitsOnMap[i][j]->addMinerals();
 				if(num != -1){
-					//Update x and y, because it will be different if the unit grew because the bitmap might change
+
 					int top=0;
 					for(int k=0; k<z; k++){
 						if(blockMap[i][j][k] != NULL)
