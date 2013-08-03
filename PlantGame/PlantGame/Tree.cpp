@@ -6,9 +6,6 @@ Tree::Tree(int w, int h)
 	width = w;
 	height = h;
 	classID = TREE;
-	level = 1;
-	size = 0;
-	seeds = 0;
 
 	mineralsToLevelUp = 100;
 	waterToLevelUp = 50;

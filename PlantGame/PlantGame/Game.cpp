@@ -78,6 +78,10 @@ void Game::keyPressSpace()
 	map->nextTurn();
 }
 
+void Game::mouseDown(){
+	map->mouseClick(mouseX, mouseY);
+}
+
 void Game::scroll(int dz)
 {
 	camZ += dz;			//camZ changes by whatever the mousewheel changed by

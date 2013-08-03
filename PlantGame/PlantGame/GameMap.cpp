@@ -7,9 +7,12 @@ GameMap::GameMap(int x, int y, int z)
 	this->y = y;
 	this->z = z;
 	nextUnitID = 0;
-	blockMouseIsOn[0]=0;
-	blockMouseIsOn[1]=0;
-	blockMouseIsOn[2]=0;
+	for(int i=0; i<3; i++){
+		blockMouseIsOn[i] = 0;
+	}
+	unitOnBlock = false;
+	selectedUnit = NULL;
+	blockUnderSelectedUnit = NULL;
 	numPlayers = 2;	//Max of 2 players on this map
 	curPlayer = 0;
 
@@ -153,6 +156,25 @@ void GameMap::addUnit(int player, int xLoc, int yLoc)	//This should only add ini
 	nextUnitID++;
 }
 
+void GameMap::mouseClick(int mouseX, int mouseY){
+	if(selectedUnit != NULL){
+		if(HEIGHT-mouseY < PLANT_UPGRADE_Y && mouseX > PLANT_UPGRADE_X + 300 && mouseX < PLANT_UPGRADE_X + 500){
+			if(selectedUnit->levelUp()){ //returns true if plant changed size
+				//update X and Y for plant
+			selectedUnit->setCoordinates(blockUnderSelectedUnit->getX()+(blockWidth/2)-(unitWidths[players.at(selectedUnit->getOwner())->getClass()][selectedUnit->getSize()]/2),
+						blockUnderSelectedUnit->getY()+(blockHeight/2)-(unitHeights[players.at(selectedUnit->getOwner())->getClass()][selectedUnit->getSize()]), 1);
+			}
+		}else if(HEIGHT-mouseY < PLANT_UPGRADE_Y && mouseX > PLANT_UPGRADE_X + 500 && mouseX < PLANT_UPGRADE_X + 700){
+			//make a seed
+		}else
+			selectedUnit = NULL;
+	}
+	if(unitOnBlock){
+		selectedUnit = unitsOnMap[blockMouseIsOn[0]][blockMouseIsOn[1]];
+		blockUnderSelectedUnit = blockMap[blockMouseIsOn[0]][blockMouseIsOn[1]][blockMouseIsOn[2]];
+	}
+}
+
 void GameMap::changeCamera(int dx, int dy, int dz, double dZoom){
 	for(int i=0; i<x; i++){	//x
 		for(int j=0; j<y; j++){ //y{	
@@ -206,7 +228,10 @@ void GameMap::nextTurn()
 					}
 				}
 			}
-			//update units and add their new seeds to board
+			//update units' minerals and add their new seeds to board
+			if(unitsOnMap[i][j] != NULL)
+				unitsOnMap[i][j]->addMinerals();
+			/*
 			if(unitsOnMap[i][j] != NULL){
 				int num = unitsOnMap[i][j]->addMinerals();
 				if(num != -1){
@@ -228,7 +253,7 @@ void GameMap::nextTurn()
 						}
 					}
 				} 		
-			}
+			}*/
 			//Turn seeds into units (randomly)
 			if(!(unitsOnMap[i][j] != NULL) && seedsOnMap[i][j][curPlayer]->hasSeeds() && rand() % 4 == 0){
 				addUnit(curPlayer, i, j);
@@ -247,9 +272,8 @@ void GameMap::nextTurn()
 void GameMap::draw(int camX, int camY, int camZ, double zoom, ALLEGRO_FONT* font, int mouseX, int mouseY)
 {
 	ALLEGRO_DISPLAY* tempDisplay = al_get_current_display();
-	ALLEGRO_BITMAP* tempBitmap = al_create_bitmap(1920/zoom, 1080/zoom);
+	ALLEGRO_BITMAP* tempBitmap = al_create_bitmap(WIDTH/zoom, HEIGHT/zoom);
 	al_set_target_bitmap(tempBitmap);
-	bool drawUnitText = false;
 	//Draws all blocks that are missing a block above or in front of them
 	for(int i=0; i<x; i++){	//x
 		for(int j=0; j<y; j++){ //y{	
@@ -257,16 +281,16 @@ void GameMap::draw(int camX, int camY, int camZ, double zoom, ALLEGRO_FONT* font
 			for(int k=0; k<camZ; k++){//z
 				if(blockMap[i][j][k] != NULL){
 					if(k==camZ-1 || !(blockMap[i+1][j][k] != NULL && blockMap[i][j+1][k] != NULL && blockMap[i][j][k+1] != NULL)){
-						blockMap[i][j][k]->draw(blockImages[blockMap[i][j][k]->getBitmap()]);
 						if(blockMap[i][j][k]->isHoveringOnBlock(mouseX, mouseY)){
 							blockMouseIsOn[0]=i;
 							blockMouseIsOn[1]=j;
 							blockMouseIsOn[2]=k;
 							if(unitsOnMap[i][j] != NULL && (top == camZ || blockMap[i][j][top+1] == NULL))
-								drawUnitText = true;
+								unitOnBlock = true;
 							else
-								drawUnitText = false;
+								unitOnBlock = false;
 						}
+						blockMap[i][j][k]->draw(blockImages[blockMap[i][j][k]->getBitmap()]);
 						//al_flip_display();
 						//al_rest(0.03);
 					}
@@ -289,11 +313,23 @@ void GameMap::draw(int camX, int camY, int camZ, double zoom, ALLEGRO_FONT* font
 	}
 	//draw text for whatever is being hovered on
 	al_set_target_bitmap(al_get_backbuffer(tempDisplay));
-	al_draw_scaled_bitmap(tempBitmap, 0, 0, 1920/zoom, 1080/zoom, 0, 0, 1920, 1080, 0);
+	al_draw_scaled_bitmap(tempBitmap, 0, 0, WIDTH/zoom, HEIGHT/zoom, 0, 0, WIDTH, HEIGHT, 0);
 	al_destroy_bitmap(tempBitmap);
 	//draw after so it doesn't get scaled with zoom
 	blockMap[blockMouseIsOn[0]][blockMouseIsOn[1]][blockMouseIsOn[2]]->drawInfoBox(font);
-	if(drawUnitText)
-		unitsOnMap[blockMouseIsOn[0]][blockMouseIsOn[1]]->drawInfoBox(font);
-
+	
+	if(selectedUnit != NULL){
+		selectedUnit->drawInfoBox(font);
+		al_draw_text(font, al_map_rgb(255,255,255), PLANT_UPGRADE_X, HEIGHT-PLANT_UPGRADE_Y, 0, "Spend minerals on:");
+		if(HEIGHT-mouseY < PLANT_UPGRADE_Y && mouseX > PLANT_UPGRADE_X + 300 && mouseX < PLANT_UPGRADE_X + 500){
+			al_draw_text(font, al_map_rgb(210,210,210), PLANT_UPGRADE_X+300, HEIGHT-PLANT_UPGRADE_Y, 0, "Level Up");
+		}else{
+			al_draw_text(font, al_map_rgb(255,255,255), PLANT_UPGRADE_X+300, HEIGHT-PLANT_UPGRADE_Y, 0, "Level Up");
+		}
+		if(HEIGHT-mouseY < PLANT_UPGRADE_Y && mouseX > PLANT_UPGRADE_X + 500 && mouseX < PLANT_UPGRADE_X + 700){
+			al_draw_text(font, al_map_rgb(210,210,210), PLANT_UPGRADE_X+500, HEIGHT-PLANT_UPGRADE_Y, 0, "Make a Seed");
+		}else{
+			al_draw_text(font, al_map_rgb(255,255,255), PLANT_UPGRADE_X+500, HEIGHT-PLANT_UPGRADE_Y, 0, "Make a Seed");
+		}
+	}
 }

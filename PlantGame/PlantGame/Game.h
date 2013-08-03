@@ -34,6 +34,7 @@ public:
 	void keyPressMinus();
 	void keyPressSpace();
 	void keyPressEnter();
+	void mouseDown();
 	void scroll(int dz);
 	
 	int update();	//updates whatever needs it every sixtieth of a second (including 'time')

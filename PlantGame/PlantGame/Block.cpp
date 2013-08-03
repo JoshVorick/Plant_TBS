@@ -85,7 +85,7 @@ void Block::replenishResources()
 
 void Block::drawInfoBox(ALLEGRO_FONT* font){
 	isHoveredOn = true;
-	al_draw_textf(font, al_map_rgb(25, 200, 100), 25, 200, 0, "Minerals: %i Minerals Per Turn: %i", mineralsAvailable, mineralsReplenishedPerTurn);
+	al_draw_textf(font, al_map_rgb(25, 200, 100), 25, 165, 0, "Minerals: %i Minerals Per Turn: %i", mineralsAvailable, mineralsReplenishedPerTurn);
 }
 
 void Block::draw(ALLEGRO_BITMAP* image){

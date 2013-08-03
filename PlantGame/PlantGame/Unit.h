@@ -21,7 +21,6 @@ protected:
 	int size;
 	int playerNum;	//Pointer to the player who owns the plant
 	int resilience;	//Maybe a measure of how hardy the plant is? How much it takes for it to start dying?
-	int seeds;	//How many seeds are produced by the plant per cycle of seed production
 	int mineralsToProduceASeed;	//minerals needed to make a seed
 	int waterToProduceASeed;	//water needed to make a seed
 	int mineralsToLevelUp;	//same^
@@ -44,9 +43,13 @@ public:
 	void setOwner(int playerNum) {this->playerNum = playerNum;}	//Sets the player who owns the plant
 	int getOwner() {return playerNum;}	//Returns the owner of the plant
 	int getResilience() {return resilience;}	//Returns the defense stat of the plant
-	int virtual addMinerals();	//Gets minerals from its soil blocks. Also calculates if it needs to make seeds and calculates level and stuff
+	bool levelUp();
+	bool makeASeed();
+	void virtual addMinerals();	//Gets minerals from its soil blocks. Also calculates if it needs to make seeds and calculates level and stuff
 													//Returns number of seeds dropped/created
 													//Returns -1 if it doesnt grow nor make seeds
-	void virtual drawInfoBox(ALLEGRO_FONT* font) {al_draw_textf(font, al_map_rgb(30,130,230), 25, 165, 0, "Level: %i Minerals: %i Water: %i", 
-		level, mineralsStored, waterStored);}
+	void virtual drawInfoBox(ALLEGRO_FONT* font) {al_draw_textf(font, al_map_rgb(30,130,230), 25, 200, 0, "Level: %i Minerals: %i Water: %i", 
+		level, mineralsStored, waterStored);
+		al_draw_textf(font, al_map_rgb(30,130,230), 25, 235, 0, "Minerals needed to level up: %i", mineralsToLevelUp);
+		al_draw_textf(font, al_map_rgb(30,130,230), 25, 270, 0, "Minerals needed to make a seed: %i", mineralsToProduceASeed);}
 };

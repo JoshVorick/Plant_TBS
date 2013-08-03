@@ -9,9 +9,13 @@
 #include "Seed.h"
 
 enum CAMERA_ANGLES {NORTH_WEST, NORTH_EAST, SOUTH_WEST, SOUTH_EAST};
-const int NUM_UNIT_TYPES = 2;	//num of units with images
-const int NUM_IMAGES_PER_UNIT = 3;	//Number of images each unit has (sapling, budding, full-grown would be 3)
-const int UNEVEN_LAYERS = 1;	//layers that can have NULL spaces
+#define NUM_UNIT_TYPES		2	//num of units with images
+#define NUM_IMAGES_PER_UNIT 3	//Number of images each unit has (sapling, budding, full-grown would be 3)
+#define UNEVEN_LAYERS		1	//layers that can have NULL spaces
+#define PLANT_UPGRADE_X		25	//x of where plant 'menu' to grow/make a seed is
+#define PLANT_UPGRADE_Y		40	//y distance from bottom edge of menu
+#define WIDTH				1920
+#define HEIGHT				1080
 
 class GameMap
 {
@@ -31,7 +35,6 @@ private:
 	ALLEGRO_BITMAP* blockImages[NUM_SOIL_TYPES];
 	ALLEGRO_BITMAP* unitImages[NUM_UNIT_TYPES][NUM_IMAGES_PER_UNIT];
 	ALLEGRO_BITMAP* seedImages[NUM_UNIT_TYPES];	//one seed image per type of unit
-	int blockMouseIsOn[3]; //3 members hold x,y,z of block
 	int unitWidths[NUM_UNIT_TYPES][NUM_IMAGES_PER_UNIT];
 	int unitHeights[NUM_UNIT_TYPES][NUM_IMAGES_PER_UNIT];
 	int blockWidth;		//the width of the image
@@ -39,6 +42,11 @@ private:
 	int seedWidths[NUM_UNIT_TYPES];
 	int seedHeights[NUM_UNIT_TYPES];
 	int blockPerceivedHeight;	//the height that the block looks like it has in the image (if it were 3D)
+	
+	int blockMouseIsOn[3]; //3 members hold x,y,z of block mouse is on top of
+	bool unitOnBlock; //Is there a unit on that^ block?
+	Unit* selectedUnit; //points to the selected unit. NULL if none are selected
+	Block* blockUnderSelectedUnit; //The block under that^ unit
 
 	int x;	//Dimension along the east-west axis
 	int y;	//Dimension along the north-south axis
@@ -54,7 +62,7 @@ public:
 	int getCurPlayerNum() {return curPlayer;}
 	int getNumPlayers() {return players.size();}
 
-	void updateMouseLocation(int mouseX, int mouseY);
+	void mouseClick(int mouseX, int mouseY);
 	void changeCamera(int dx, int dy, int dz, double dZoom);
 	void nextTurn(); //Updates units and blocks for next player's turn
 	void draw(int x, int y,int z, double zoom, ALLEGRO_FONT* font, int mouseX, int mouseY);	//Draws based on camera position

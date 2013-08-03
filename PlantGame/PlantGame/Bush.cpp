@@ -6,9 +6,6 @@ Bush::Bush(int w, int h)
 	width = w;
 	height = h;
 	classID = BUSH;
-	level = 1;
-	size = 0;
-	seeds = 0;
 
 	mineralsToLevelUp = 100;
 	waterToLevelUp = 50;

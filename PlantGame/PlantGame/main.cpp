@@ -1,4 +1,3 @@
-#pragma once
 //Allegro Headers -- add to as needed
 #include <allegro5\allegro.h>
 #include <allegro5\allegro5.h>
@@ -27,8 +26,6 @@
 //Function Prototypes
 void processKeyDown(ALLEGRO_EVENT ev, GameState *state);
 void changeState(int newID, GameState *state);
-const int WIDTH = 1920;
-const int HEIGHT = 1080;
 //Global Constants and Variables as needed
 
 int main()
@@ -74,7 +71,7 @@ int main()
 	load bitmaps, audio, font, etc
 	*/
 	curState = new StartMenu();	//sets first state to start menu
-	curState->setwindowSize(windowWidth, windowHeight);
+	curState->setwindowSize(WIDTH, HEIGHT);
 
 	timer = al_create_timer(1.0/FPS);
 	event_queue = al_create_event_queue();			//create event queue, then register all sources sp ot works
@@ -108,19 +105,19 @@ int main()
 					case 1://start GameLobby()
 						delete curState;		//prevent memory leakaage, deletes old GameState
 						curState = new GameLobby();
-						curState->setwindowSize(windowWidth, windowHeight);
+						curState->setwindowSize(WIDTH, HEIGHT);
 						break;
 					case 2://go to start menu
 						delete curState;
 						curState = new StartMenu();
-						curState->setwindowSize(windowWidth, windowHeight);
+						curState->setwindowSize(WIDTH, HEIGHT);
 						break;
 					case 3://Go from lobby into game
 						GameMap* map = curState->getMap();
 						delete curState;
 						curState = new Game();
 						curState->addMap(map);
-						curState->setwindowSize(windowWidth, windowHeight);
+						curState->setwindowSize(WIDTH, HEIGHT);
 						//delete tempPlayers somehow?
 						break;
 				}
