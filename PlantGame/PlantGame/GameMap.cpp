@@ -157,23 +157,26 @@ void GameMap::addUnit(int player, int xLoc, int yLoc)	//This should only add ini
 }
 
 void GameMap::mouseClick(int mouseX, int mouseY){
-	if(selectedUnit != NULL && curPlayer == 0){
+	if(selectedUnit != NULL){
 		if(HEIGHT-mouseY < PLANT_UPGRADE_Y && mouseX > PLANT_UPGRADE_X + 300 && mouseX < PLANT_UPGRADE_X + 500){
-			if(selectedUnit->levelUp()){ //returns true if plant changed size
+			if(curPlayer == 0){
+				if(selectedUnit->levelUp()){ //returns true if plant changed size
 				//update X and Y for plant
-			selectedUnit->setCoordinates(blockUnderSelectedUnit->getX()+(blockWidth/2)-(unitWidths[players.at(selectedUnit->getOwner())->getClass()][selectedUnit->getSize()]/2),
+				selectedUnit->setCoordinates(blockUnderSelectedUnit->getX()+(blockWidth/2)-(unitWidths[players.at(selectedUnit->getOwner())->getClass()][selectedUnit->getSize()]/2),
 						blockUnderSelectedUnit->getY()+(blockHeight/2)-(unitHeights[players.at(selectedUnit->getOwner())->getClass()][selectedUnit->getSize()]), 1);
+				}
 			}
 		}else if(HEIGHT-mouseY < PLANT_UPGRADE_Y && mouseX > PLANT_UPGRADE_X + 500 && mouseX < PLANT_UPGRADE_X + 700){
 			//make a seed
-			if(selectedUnit->makeSeed()) //returns true if you have minerals to make a seed
-				seedsOnMap[blockMouseIsOn[0]][blockMouseIsOn[1]][curPlayer]->addSeed();
+			if(curPlayer == 0)
+				if(selectedUnit->makeSeed()) //returns true if you have minerals to make a seed
+					seedsOnMap[blockMouseIsOn[0]][blockMouseIsOn[1]][curPlayer]->addSeed();
 		}else{
-			selectedUnit->toggleSelected();
+			selectedUnit->toggleSelected(); 
 			selectedUnit = NULL;
 		}
 	}
-	if(unitOnBlock){
+	if(unitOnBlock && selectedUnit == NULL){
 		selectedUnit = unitsOnMap[blockMouseIsOn[0]][blockMouseIsOn[1]];
 		selectedUnit->toggleSelected();
 		blockUnderSelectedUnit = blockMap[blockMouseIsOn[0]][blockMouseIsOn[1]][blockMouseIsOn[2]];
