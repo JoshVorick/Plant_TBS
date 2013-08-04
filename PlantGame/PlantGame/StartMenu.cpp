@@ -1,23 +1,21 @@
 #pragma once
 #include "StartMenu.h"
 
-StartMenu::StartMenu()
-{
+StartMenu::StartMenu(){
 	mouseX = 0;
 	mouseY = 0;
 	fontHeight = 36;
 	gotClicked = false;
 	selected = -1;;	//controls when to start the game and go into the game
 	font36 = al_load_ttf_font("Fonts/A_Sensible_Armadillo.ttf", 36, 0);
+	background = al_load_bitmap("Bitmaps/grass1.png");
 }
 
-StartMenu::~StartMenu()
-{
+StartMenu::~StartMenu(){
 	al_destroy_font(font36);
 }
 
-void StartMenu::keyPressEnter()
-{
+void StartMenu::keyPressEnter(){
 	selected = START_GAME;	//testing purposes. Pressing A goes to lobby
 	gotClicked = true;
 }
@@ -27,13 +25,7 @@ void StartMenu::mouseDown(){
 		gotClicked = true;
 }
 
-void StartMenu::scroll(int dz)
-{
-
-}
-
-int StartMenu::update()
-{	
+int StartMenu::update(){	
 	if(gotClicked && selected == START_GAME)
 		return 1;
 	if(gotClicked && selected == EXIT)
@@ -49,8 +41,8 @@ int StartMenu::update()
 	return -1;
 }
 
-void StartMenu::draw()
-{
+void StartMenu::draw(){
+	al_draw_bitmap(background, 0, 0, 0);
 	al_draw_rectangle(mouseX-5, mouseY-5, mouseX+5, mouseY+5, al_map_rgb(255,0,0), 5);	//testing purposes
 	al_draw_text(font36, al_map_rgb(100,0,100), 25,25,0, "Press Space to make game Lobby");
 	al_draw_textf(font36, al_map_rgb(100,0,100), 25,60,0, "This is the START MENU.");

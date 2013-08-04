@@ -13,7 +13,7 @@ enum CAMERA_ANGLES {NORTH_WEST, NORTH_EAST, SOUTH_WEST, SOUTH_EAST};
 #define NUM_IMAGES_PER_UNIT 3	//Number of images each unit has (sapling, budding, full-grown would be 3)
 #define UNEVEN_LAYERS		1	//layers that can have NULL spaces
 #define PLANT_UPGRADE_X		25	//x of where plant 'menu' to grow/make a seed is
-#define PLANT_UPGRADE_Y		40	//y distance from bottom edge of menu
+#define PLANT_UPGRADE_Y		140	//y distance from bottom edge of menu
 #define WIDTH				1920
 #define HEIGHT				1080
 
@@ -52,6 +52,8 @@ private:
 	int y;	//Dimension along the north-south axis
 	int z;	//Dimension along the up-down axis
 	int angleID;
+	
+	void addSeed(int x, int y);
 
 public:
 	GameMap(int x, int y, int z);	//Creates an x by y by z map

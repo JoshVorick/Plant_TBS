@@ -18,6 +18,7 @@ protected:
 	ALLEGRO_FONT *font36;
 	GameMap* map;			//Map of everything on screen
 	GameOptions* options;	//Object that encapsulates all in-game options like fog of war, etc.
+	ALLEGRO_BITMAP* background;
 
 public:
 	GameState(){}

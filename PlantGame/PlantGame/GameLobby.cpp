@@ -4,6 +4,7 @@
 GameLobby::GameLobby()
 {
 	font36 = al_load_ttf_font("Fonts/A_Sensible_Armadillo.ttf", 36, 0);
+	background = al_load_bitmap("Bitmaps/grass2.png");
 	exitToStart = false;
 	startGame = false;
 	map = new GameMap(10,10,8);
@@ -77,6 +78,7 @@ int GameLobby::update()
 }
 
 void GameLobby::draw(){
+	al_draw_bitmap(background, 0, 0, 0);
 	al_draw_text(font36, al_map_rgb(255, 255, 55), windowWidth/2, windowHeight/2-200, ALLEGRO_ALIGN_CENTRE, "Welcome to the Game Lobby!");
 	al_draw_text(font36, al_map_rgb(255,255,255), windowWidth/2, windowHeight/2-150, ALLEGRO_ALIGN_CENTRE, "Press A to be a tree! Press D to be a flower!");
 	//draw player names

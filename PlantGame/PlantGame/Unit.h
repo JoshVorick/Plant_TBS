@@ -33,6 +33,7 @@ protected:
 public:
 	Unit();
 	~Unit();	//Garbage collection
+	void toggleSelected() {for(unsigned int i=0; i<hasRootsIn.size(); i++) hasRootsIn.at(i)->toggleHighlight();}
 	void setBlockMap(Block* blocks[MAX_X+1][MAX_Y+1][MAX_Z+1], int unitX, int unitY); //sets pointer where they should point
 	void setID(int ID) {unitID = ID;}
 	int getID() {return unitID;}
@@ -43,13 +44,16 @@ public:
 	void setOwner(int playerNum) {this->playerNum = playerNum;}	//Sets the player who owns the plant
 	int getOwner() {return playerNum;}	//Returns the owner of the plant
 	int getResilience() {return resilience;}	//Returns the defense stat of the plant
+	bool makeSeed();
 	bool levelUp();
 	bool makeASeed();
 	void virtual addMinerals();	//Gets minerals from its soil blocks. Also calculates if it needs to make seeds and calculates level and stuff
 													//Returns number of seeds dropped/created
 													//Returns -1 if it doesnt grow nor make seeds
+	//void virtual draw(ALLEGRO_BITMAP* image){ al_draw_tinted_bitmap(image, al_map_rgba(255, 255, 255, 225), x, y, 0);}
 	void virtual drawInfoBox(ALLEGRO_FONT* font) {al_draw_textf(font, al_map_rgb(30,130,230), 25, 200, 0, "Level: %i Minerals: %i Water: %i", 
 		level, mineralsStored, waterStored);
 		al_draw_textf(font, al_map_rgb(30,130,230), 25, 235, 0, "Minerals needed to level up: %i", mineralsToLevelUp);
-		al_draw_textf(font, al_map_rgb(30,130,230), 25, 270, 0, "Minerals needed to make a seed: %i", mineralsToProduceASeed);}
+		al_draw_textf(font, al_map_rgb(30,130,230), 25, 270, 0, "Minerals needed to make a seed: %i", mineralsToProduceASeed);
+		al_draw_textf(font, al_map_rgb(30,130,230), 25, 305, 0, "Type: %i", classID);}
 };

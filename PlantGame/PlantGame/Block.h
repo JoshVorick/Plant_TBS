@@ -21,6 +21,7 @@ class Block : public Sprite
 private:
 	//Images are held in GameMap
 	bool isHoveredOn;
+	bool isHighlighted;
 	int blockID;				//Pretty obvious -- an ID describing what type of block it is
 	int mineralsAvailable;		//How many minerals are currently available in the soil block
 	int mineralsReplenishedPerTurn;	//How many minerals are given to the block after each turn cycle
@@ -35,6 +36,7 @@ private:
 public:
 	Block(int id, int w, int h);	//Initializes values minearls/water based on ID passed
 	~Block();	//Does whatever garbage collection is needed
+	void toggleHighlight() {isHighlighted = !isHighlighted;}
 	bool isHoveringOnBlock(int mouseX, int mouseY);
 	int getBitmap() {return blockID;}	//Returns the bitmap so the block can be drawn
 	void addRoots(int unitID);	//Used when block get new roots

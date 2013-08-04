@@ -57,7 +57,7 @@ GameMap::GameMap(int x, int y, int z)
 	
 	unitImages[TREE][0] = al_load_bitmap("Bitmaps/Tree1.bmp");
 	unitImages[TREE][1] = al_load_bitmap("Bitmaps/Tree2.bmp");
-	unitImages[TREE][2] = al_load_bitmap("Bitmaps/Tree3.bmp");
+	unitImages[TREE][2] = al_load_bitmap("Bitmaps/Tree3.png");
 	unitImages[FLOWER][0] = al_load_bitmap("Bitmaps/Flower1.bmp");
 	unitImages[FLOWER][1] = al_load_bitmap("Bitmaps/Flower2.bmp");
 	unitImages[FLOWER][2] = al_load_bitmap("Bitmaps/Flower3.bmp");
@@ -157,7 +157,7 @@ void GameMap::addUnit(int player, int xLoc, int yLoc)	//This should only add ini
 }
 
 void GameMap::mouseClick(int mouseX, int mouseY){
-	if(selectedUnit != NULL){
+	if(selectedUnit != NULL && curPlayer == 0){
 		if(HEIGHT-mouseY < PLANT_UPGRADE_Y && mouseX > PLANT_UPGRADE_X + 300 && mouseX < PLANT_UPGRADE_X + 500){
 			if(selectedUnit->levelUp()){ //returns true if plant changed size
 				//update X and Y for plant
@@ -166,11 +166,16 @@ void GameMap::mouseClick(int mouseX, int mouseY){
 			}
 		}else if(HEIGHT-mouseY < PLANT_UPGRADE_Y && mouseX > PLANT_UPGRADE_X + 500 && mouseX < PLANT_UPGRADE_X + 700){
 			//make a seed
-		}else
+			if(selectedUnit->makeSeed()) //returns true if you have minerals to make a seed
+				seedsOnMap[blockMouseIsOn[0]][blockMouseIsOn[1]][curPlayer]->addSeed();
+		}else{
+			selectedUnit->toggleSelected();
 			selectedUnit = NULL;
+		}
 	}
 	if(unitOnBlock){
 		selectedUnit = unitsOnMap[blockMouseIsOn[0]][blockMouseIsOn[1]];
+		selectedUnit->toggleSelected();
 		blockUnderSelectedUnit = blockMap[blockMouseIsOn[0]][blockMouseIsOn[1]][blockMouseIsOn[2]];
 	}
 }
@@ -231,29 +236,7 @@ void GameMap::nextTurn()
 			//update units' minerals and add their new seeds to board
 			if(unitsOnMap[i][j] != NULL)
 				unitsOnMap[i][j]->addMinerals();
-			/*
-			if(unitsOnMap[i][j] != NULL){
-				int num = unitsOnMap[i][j]->addMinerals();
-				if(num != -1){
 
-					int top=0;
-					for(int k=0; k<z; k++){
-						if(blockMap[i][j][k] != NULL)
-							top++;
-						else
-							break;
-					}
-					unitsOnMap[i][j]->setCoordinates(blockMap[i][j][top-1]->getX()+(blockWidth/2)-(unitWidths[players.at(unitsOnMap[i][j]->getOwner())->getClass()][unitsOnMap[i][j]->getSize()]/2),
-						blockMap[i][j][top-1]->getY()+(blockHeight/2)-(unitHeights[players.at(unitsOnMap[i][j]->getOwner())->getClass()][unitsOnMap[i][j]->getSize()]), 1);
-
-					//Make a new seeds based on if the unit made more or not
-					if(unitsOnMap[i][j]->getOwner() == curPlayer){
-						for(int k=0; k<num; k++){
-							seedsOnMap[i][j][curPlayer]->addSeed();
-						}
-					}
-				} 		
-			}*/
 			//Turn seeds into units (randomly)
 			if(!(unitsOnMap[i][j] != NULL) && seedsOnMap[i][j][curPlayer]->hasSeeds() && rand() % 4 == 0){
 				addUnit(curPlayer, i, j);

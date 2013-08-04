@@ -6,6 +6,8 @@ Block::Block(int id, int w, int h){
 	blockID = id;
 	width = w;
 	height = h;
+	isHoveredOn = false;
+	isHighlighted = false;
 	switch(id){
 		case 1:
 			mineralsAvailable = 25;
@@ -89,9 +91,11 @@ void Block::drawInfoBox(ALLEGRO_FONT* font){
 }
 
 void Block::draw(ALLEGRO_BITMAP* image){
-	if(!isHoveredOn)
-		al_draw_bitmap(image, x, y, 0);
-	else
+	if(isHoveredOn)
 		al_draw_tinted_bitmap(image, al_map_rgb(100,100,100), x, y, 0);
+	else if(isHighlighted)
+		al_draw_tinted_bitmap(image, al_map_rgb(120,200,120), x, y, 0);
+	else
+		al_draw_bitmap(image, x, y, 0);
 	isHoveredOn = false;
 }
