@@ -19,8 +19,10 @@ GameMap::GameMap(int x, int y, int z)
 
 	for(int i=0; i<x+1; i++)	//x
 		for(int j=0; j<y+1; j++) //y
-			for(int k=0; k<z+1; k++)
+			for(int k=0; k<z+1; k++){
 				blockMap[i][j][k] = NULL;
+				unitsOnMap[i][j] = NULL;
+			}
 
 	blockImages[0] = al_load_bitmap("Bitmaps/Soil1.bmp");
 	blockImages[1] = al_load_bitmap("Bitmaps/Soil2.bmp");
@@ -33,18 +35,26 @@ GameMap::GameMap(int x, int y, int z)
 	blockHeight = al_get_bitmap_height(blockImages[0])-1; //-1 because it looks better;
 
 	blockPerceivedHeight = 32;
-	for(int i=0; i<x; i++){	//x
-		for(int j=0; j<y; j++) {//y
+	int halfX = (int)x/2+1;
+	int halfY = (int)y/2+1;
+	for(int i=0; i < halfX; i++){	//x
+		for(int j=0; j < halfY; j++) {//y
 			//INITIALIZE BLOCKS
+			int ID = rand() % 3 + 1;
 			for(int k=0; k<(z-UNEVEN_LAYERS); k++) {//z
-				blockMap[i][j][k] = new Block(1 + rand() % 3, blockWidth, blockHeight);	//Bottom layers are solid/whole with random soil type
+				blockMap[i][j][k] = new Block(ID, blockWidth, blockHeight);	//Bottom layers are solid/whole with random soil type
+				blockMap[x-i-1][y-j-1][k] = new Block(ID, blockWidth, blockHeight);
+				blockMap[i][y-j-1][k] = new Block(ID, blockWidth, blockHeight);
+				blockMap[x-i-1][j][k] = new Block(ID, blockWidth, blockHeight);
 			}
 			for(int k=z-UNEVEN_LAYERS; k<z; k++){ //z
-				if(rand() % 2 && blockMap[i][j][k-1] != NULL)		//will randomly create some as long as the block below it is soil
-					blockMap[i][j][k] = new Block(1 + rand() % 3, blockWidth, blockHeight);
+				if(rand() % 2 && blockMap[i][j][k-1] != NULL){		//will randomly create some as long as the block below it is soil
+					blockMap[i][j][k] = new Block(ID, blockWidth, blockHeight);
+					blockMap[x-i-1][y-j-1][k] = new Block(ID, blockWidth, blockHeight);
+					blockMap[i][y-j-1][k] = new Block(ID, blockWidth, blockHeight);
+					blockMap[x-i-1][j][k] = new Block(ID, blockWidth, blockHeight);
+				}
 			}
-			//INITIALIZE UNITS AS NULL
-			unitsOnMap[i][j] = NULL;
 		}
 	}
 	seedImages[0] = al_load_bitmap("Bitmaps/SeedTree.bmp");
@@ -84,11 +94,6 @@ GameMap::GameMap(int x, int y, int z)
 						blockPerceivedHeight+((j+i)*(blockHeight-blockPerceivedHeight)/2)-((k)*(blockPerceivedHeight-4)),1);
 					top++;
 				}
-			}
-			//Initialize unit coordinates
-			if(unitsOnMap[i][j] != NULL){
-				unitsOnMap[i][j]->setCoordinates(((x-1)*blockWidth/2)+(i*blockWidth/2)-((j-1)*blockWidth/2)-(unitWidths[unitsOnMap[i][j]->getClass()][unitsOnMap[i][j]->getSize()]/2),
-					blockPerceivedHeight+((j+i+2)*(blockHeight-blockPerceivedHeight)/2)-((top)*(blockPerceivedHeight-4))-(unitHeights[unitsOnMap[i][j]->getClass()][unitsOnMap[i][j]->getSize()]),1);
 			}
 		}
 	}
