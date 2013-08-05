@@ -44,9 +44,11 @@ private:
 	int blockPerceivedHeight;	//the height that the block looks like it has in the image (if it were 3D)
 	
 	int blockMouseIsOn[3]; //3 members hold x,y,z of block mouse is on top of
+	int selectedUnitCoor[2];
 	bool unitOnBlock; //Is there a unit on that^ block?
 	Unit* selectedUnit; //points to the selected unit. NULL if none are selected
 	Block* blockUnderSelectedUnit; //The block under that^ unit
+	bool autopilot; //Automatically levels up and grows seeds for the plant
 
 	int x;	//Dimension along the east-west axis
 	int y;	//Dimension along the north-south axis

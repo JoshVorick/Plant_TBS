@@ -38,6 +38,7 @@ public:
 	void setID(int ID) {unitID = ID;}
 	int getID() {return unitID;}
 	int getClass() {return classID;}
+	int getLevel() {return level;}
 	int getSize() {return size;}
 	int getCurrentHitPoints() {return hitPoints;}	//Returns the plant's current hit points
 	int getMaxHitPoints() {return maxHitPoints;}	//Returns the max hp of the plant

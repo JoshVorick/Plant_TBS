@@ -7,6 +7,7 @@ GameMap::GameMap(int x, int y, int z)
 	this->y = y;
 	this->z = z;
 	nextUnitID = 0;
+	autopilot = false;
 	for(int i=0; i<3; i++){
 		blockMouseIsOn[i] = 0;
 	}
@@ -170,17 +171,24 @@ void GameMap::mouseClick(int mouseX, int mouseY){
 			//make a seed
 			if(curPlayer == 0)
 				if(selectedUnit->makeSeed()) //returns true if you have minerals to make a seed
-					seedsOnMap[blockMouseIsOn[0]][blockMouseIsOn[1]][curPlayer]->addSeed();
+					seedsOnMap[selectedUnitCoor[0]][selectedUnitCoor[1]][curPlayer]->addSeed();
 		}else{
 			selectedUnit->toggleSelected(); 
+			selectedUnitCoor[0] = -1;
+			selectedUnitCoor[1] = -1;
 			selectedUnit = NULL;
 		}
 	}
 	if(unitOnBlock && selectedUnit == NULL){
 		selectedUnit = unitsOnMap[blockMouseIsOn[0]][blockMouseIsOn[1]];
+		selectedUnitCoor[0] = blockMouseIsOn[0];
+		selectedUnitCoor[1] = blockMouseIsOn[1];
 		selectedUnit->toggleSelected();
 		blockUnderSelectedUnit = blockMap[blockMouseIsOn[0]][blockMouseIsOn[1]][blockMouseIsOn[2]];
 	}
+	//Check for autopilot
+	if(mouseX > WIDTH - 200 && mouseY < 35)
+		autopilot = !autopilot;
 }
 
 void GameMap::changeCamera(int dx, int dy, int dz, double dZoom){
@@ -253,6 +261,34 @@ void GameMap::nextTurn()
 		}
 	}
 	curPlayer = (curPlayer+1) % numPlayers;
+
+	//Do autopilot things
+	if(autopilot)
+		for(int i=0; i<x; i++){
+			for(int j=0; j<y; j++){
+				if(unitsOnMap[i][j] != NULL && unitsOnMap[i][j]->getOwner() == curPlayer){
+					if(unitsOnMap[i][j]->getLevel() < 10){
+						if(!(selectedUnit != NULL) || selectedUnit != unitsOnMap[i][j])
+							unitsOnMap[i][j]->toggleSelected();
+						if(unitsOnMap[i][j]->levelUp()){
+							int top=0;
+							for(int k=0; k<z; k++)
+								if(blockMap[i][j][k] != NULL)
+									top++;
+								else
+									break;
+							unitsOnMap[i][j]->setCoordinates(blockMap[i][j][top-1]->getX()+(blockWidth/2)-(unitWidths[unitsOnMap[i][j]->getClass()][unitsOnMap[i][j]->getSize()]/2),
+  								blockMap[i][j][top-1]->getY()+(blockHeight/2)-(unitHeights[unitsOnMap[i][j]->getClass()][unitsOnMap[i][j]->getSize()]), 1);
+						}
+						if(!(selectedUnit != NULL) || selectedUnit != unitsOnMap[i][j])
+							unitsOnMap[i][j]->toggleSelected();
+					}else{
+						if(unitsOnMap[i][j]->makeASeed())
+							seedsOnMap[i][j][curPlayer]->addSeed();
+					}
+				}
+			}
+		}
 }
 
 void GameMap::draw(int camX, int camY, int camZ, double zoom, ALLEGRO_FONT* font, int mouseX, int mouseY)
@@ -318,4 +354,14 @@ void GameMap::draw(int camX, int camY, int camZ, double zoom, ALLEGRO_FONT* font
 			al_draw_text(font, al_map_rgb(255,255,255), PLANT_UPGRADE_X+500, HEIGHT-PLANT_UPGRADE_Y, 0, "Make a Seed");
 		}
 	}
+	char* state;
+	if(autopilot)
+		state = "On";
+	else
+		state = "Off";
+
+	if(mouseX > WIDTH - 200 && mouseY < 35)
+		al_draw_textf(font, al_map_rgb(155,200,225), WIDTH, 0, ALLEGRO_ALIGN_RIGHT, "AUTOPILOT: %s", state);
+	else
+		al_draw_textf(font, al_map_rgb(255,255,255), WIDTH, 0, ALLEGRO_ALIGN_RIGHT, "AUTOPILOT: %s", state);
 }

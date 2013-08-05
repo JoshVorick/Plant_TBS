@@ -58,7 +58,7 @@ bool Unit::levelUp(){ //returns true if the size changes
 
 	if(mineralsStored >= mineralsToLevelUp){
 		mineralsStored -= mineralsToLevelUp;
-		if(level % 2 && size < 2){
+		if(level % 4 == 3 && size < 2){
 			size++;
 			doesSizeChange = true;
 		}
