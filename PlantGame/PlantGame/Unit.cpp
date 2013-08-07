@@ -79,8 +79,11 @@ bool Unit::levelUp(){ //returns true if the size changes
 }
 
 bool Unit::makeASeed(){
-	if(mineralsStored >= mineralsToProduceASeed)
+	if(mineralsStored >= mineralsToProduceASeed){
+		mineralsStored -= mineralsToProduceASeed;
+		mineralsToProduceASeed += 10;
 		return true;
+	}
 	else
 		return false;
 }

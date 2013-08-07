@@ -268,32 +268,40 @@ void GameMap::nextTurn()
 	curPlayer = (curPlayer+1) % numPlayers;
 
 	//Do autopilot things
-	if(autopilot)
-		for(int i=0; i<x; i++){
-			for(int j=0; j<y; j++){
-				if(unitsOnMap[i][j] != NULL && unitsOnMap[i][j]->getOwner() == curPlayer){
-					if(unitsOnMap[i][j]->getLevel() < 10){
-						if(!(selectedUnit != NULL) || selectedUnit != unitsOnMap[i][j])
-							unitsOnMap[i][j]->toggleSelected();
-						if(unitsOnMap[i][j]->levelUp()){
-							int top=0;
-							for(int k=0; k<z; k++)
-								if(blockMap[i][j][k] != NULL)
-									top++;
-								else
-									break;
-							unitsOnMap[i][j]->setCoordinates(blockMap[i][j][top-1]->getX()+(blockWidth/2)-(unitWidths[unitsOnMap[i][j]->getClass()][unitsOnMap[i][j]->getSize()]/2),
-  								blockMap[i][j][top-1]->getY()+(blockHeight/2)-(unitHeights[unitsOnMap[i][j]->getClass()][unitsOnMap[i][j]->getSize()]), 1);
+	if(autopilot){
+		bool hasMinerals = true;
+		while(hasMinerals){
+			hasMinerals = false;
+			for(int i=0; i<x; i++){
+				for(int j=0; j<y; j++){
+					if(unitsOnMap[i][j] != NULL && unitsOnMap[i][j]->getOwner() == curPlayer){
+						if(unitsOnMap[i][j]->getLevel() < 10){
+							if(!(selectedUnit != NULL) || selectedUnit != unitsOnMap[i][j])
+								unitsOnMap[i][j]->toggleSelected();
+							if(unitsOnMap[i][j]->levelUp()){
+								hasMinerals = true;
+								int top=0;
+								for(int k=0; k<z; k++)
+									if(blockMap[i][j][k] != NULL)
+										top++;
+									else
+										break;
+								unitsOnMap[i][j]->setCoordinates(blockMap[i][j][top-1]->getX()+(blockWidth/2)-(unitWidths[unitsOnMap[i][j]->getClass()][unitsOnMap[i][j]->getSize()]/2),
+  									blockMap[i][j][top-1]->getY()+(blockHeight/2)-(unitHeights[unitsOnMap[i][j]->getClass()][unitsOnMap[i][j]->getSize()]), 1);
+							}
+							if(!(selectedUnit != NULL) || selectedUnit != unitsOnMap[i][j])
+								unitsOnMap[i][j]->toggleSelected();
+						}else{
+							if(unitsOnMap[i][j]->makeASeed()){
+								seedsOnMap[i][j][curPlayer]->addSeed();
+								hasMinerals = true;
+							}
 						}
-						if(!(selectedUnit != NULL) || selectedUnit != unitsOnMap[i][j])
-							unitsOnMap[i][j]->toggleSelected();
-					}else{
-						if(unitsOnMap[i][j]->makeASeed())
-							seedsOnMap[i][j][curPlayer]->addSeed();
 					}
 				}
 			}
 		}
+	}
 }
 
 void GameMap::draw(int camX, int camY, int camZ, double zoom, ALLEGRO_FONT* font, int mouseX, int mouseY)

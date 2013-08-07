@@ -11,7 +11,7 @@
 enum CAMERA_ANGLES {NORTH_WEST, NORTH_EAST, SOUTH_WEST, SOUTH_EAST};
 #define NUM_UNIT_TYPES		2	//num of units with images
 #define NUM_IMAGES_PER_UNIT 3	//Number of images each unit has (sapling, budding, full-grown would be 3)
-#define UNEVEN_LAYERS		1	//layers that can have NULL spaces
+#define UNEVEN_LAYERS		3	//layers that can have NULL spaces
 #define PLANT_UPGRADE_X		25	//x of where plant 'menu' to grow/make a seed is
 #define PLANT_UPGRADE_Y		140	//y distance from bottom edge of menu
 #define WIDTH				1920
