@@ -6,6 +6,9 @@
 #include "GameMap.h"
 #include "GameOptions.h"
 
+#define		DEFAULT_BUFLEN		512
+#define		DEFAULT_PORT		"27015"
+
 class GameState
 {
 private:
@@ -19,6 +22,10 @@ protected:
 	GameMap* map;			//Map of everything on screen
 	GameOptions* options;	//Object that encapsulates all in-game options like fog of war, etc.
 	ALLEGRO_BITMAP* background;
+	std::string playerName;
+	char* sendbuf;
+	char recvbuf[DEFAULT_BUFLEN];
+	bool shouldSendOrReceive; //true if the game needs to send or receive data
 
 public:
 	GameState(){}
@@ -38,6 +45,7 @@ public:
 	void virtual mouseDown() {}
 	void virtual scroll(int dz) {}
 
+	void virtual setHost(std::string myName){playerName = myName;}
 	void virtual addMap(GameMap* newMap) {map = newMap;}	//adds vector of players to the class
 	GameMap* getMap() {return map;}	//gets the classes vector of players
 
@@ -46,4 +54,6 @@ public:
 								//mouse location (make a pop-up box?) and changing values if something is moving across the screen
 								//Won't have too much to it because this is a TBS
 								//returns integer ID if needs to change state, else -1
+	virtual char* getBitsToBeSent() {char* stringsAreFun = "HIIIIIIII"; return stringsAreFun;}
+	void virtual  setBitsReceived(char* bitsReceived) {}
 };

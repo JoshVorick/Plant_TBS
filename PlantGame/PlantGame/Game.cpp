@@ -99,7 +99,7 @@ int Game::update()
 {
 	gameTime++;
 	if(exitToStart)
-		return 2;
+		return 3;
 	return -1;
 }
 

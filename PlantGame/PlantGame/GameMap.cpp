@@ -19,10 +19,14 @@ GameMap::GameMap(int x, int y, int z)
 
 	for(int i=0; i<x+1; i++)	//x
 		for(int j=0; j<y+1; j++) //y
-			for(int k=0; k<z+1; k++){
+			for(int k=0; k<z+1; k++)
 				blockMap[i][j][k] = NULL;
-				unitsOnMap[i][j] = NULL;
-			}
+
+	for(int i=0; i<x; i++)
+		for(int j=0; j<y; j++)
+			unitsOnMap[i][j] = NULL;
+
+
 
 	blockImages[0] = al_load_bitmap("Bitmaps/Soil1.bmp");
 	blockImages[1] = al_load_bitmap("Bitmaps/Soil2.bmp");
@@ -97,7 +101,6 @@ GameMap::GameMap(int x, int y, int z)
 			}
 		}
 	}
-
 }
 
 GameMap::~GameMap()

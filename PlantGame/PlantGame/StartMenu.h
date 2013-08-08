@@ -3,7 +3,7 @@
 #include <vector>
 #include "GameState.h"
 
-enum startMenuOptions {START_GAME, HELP, EXIT};
+enum startMenuOptions {START_GAME_HOST, START_GAME_CLIENT, HELP, EXIT};
 
 class StartMenu : public GameState
 {
