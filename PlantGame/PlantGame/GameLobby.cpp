@@ -13,6 +13,7 @@ GameLobby::GameLobby()
 	sendbuf = "";
 	exitToStart = false;
 	startGame = false;
+	hasSentType = false;
 	map = new GameMap(10,10,8);
 	shouldSendOrReceive = false;
 }
@@ -100,11 +101,16 @@ void GameLobby::draw(){
 
 char* GameLobby::getBitsToBeSent(){
 	char* bitsToSend;
-	if(map->getPlayers().at(0)->getClass() == 0)
-		bitsToSend = "0";
-	else
-		bitsToSend = "1";
-	strcat(bitsToSend, map->getPlayers().at(0)->getName().c_str());
+	if(!hasSentType){
+		if(map->getPlayers().at(0)->getClass() == 0)
+			bitsToSend = "0";
+		else
+			bitsToSend = "1";
+		hasSentType = true;
+	}else{
+		bitsToSend = (char*)map->getPlayers().at(0)->getName().c_str();
+	}
+	//strcat(bitsToSend, map->getPlayers().at(0)->getName().c_str());
 
 	return bitsToSend;
 }

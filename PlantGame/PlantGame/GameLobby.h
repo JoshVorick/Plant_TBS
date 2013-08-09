@@ -25,6 +25,7 @@ class GameLobby : public GameState
 private:
 	bool startGame;
 	bool exitToStart;
+	bool hasSentType;
 
 public:
 	GameLobby();	//Will have to work for host and non-host joining host's lobby

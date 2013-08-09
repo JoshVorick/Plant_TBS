@@ -159,6 +159,9 @@ int main()
 				curState->setwindowSize(WIDTH, HEIGHT);
 				curState->setHost("CLIENT");
 				initializeClient(&myFancySock);
+				curState->draw();
+				al_flip_display();
+				al_clear_to_color(al_map_rgb(30,30,30));	
 				/*bool hasSelectedType = false;
 				while(!hasSelectedType){
 					al_wait_for_event(event_queue, &ev);
