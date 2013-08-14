@@ -31,11 +31,16 @@
 #pragma comment (lib, "Ws2_32.lib")
 
 //Function Prototypes
-void processKeyDown(ALLEGRO_EVENT ev, GameState *state);
+void processKeyDown(ALLEGRO_EVENT ev, GameState *state, struct client *myFancySock);
 void changeState(int newID, GameState *state);
 void initializeServer(struct client *newServer);
 void initializeClient(struct client *newClient);
+void connectClient(GameState *curState, struct client *myFancySock);
+void connectHost(GameState *curState, struct client *myFancySock);
+
 //Global Constants and Variables as needed
+bool readyToConnect = false;
+bool amIHosting = false;
 
 int main()
 {
@@ -114,94 +119,22 @@ int main()
 				done = true;
 				break;
 			case 1://start GameLobby as HOST
-				{delete curState;
+				{amIHosting = true;
+				delete curState;
 				curState = new GameLobby();
 				curState->setwindowSize(WIDTH, HEIGHT);
 				curState->setHost("HOST");
 				initializeServer(&myFancySock);
-				curState->draw();
-				al_flip_display();
-				al_clear_to_color(al_map_rgb(30,30,30));
-				/*bool hasSelectedType = false;
-				while(!hasSelectedType){
-					ALLEGRO_EVENT ev1;
-					al_wait_for_event(event_queue, &ev1);
-					if(ev.type == ALLEGRO_KEY_DOWN){
-						if(ev1.keyboard.keycode == ALLEGRO_KEY_A){
-							curState->keyPressA();
-							hasSelectedType = true;	
-						}
-						if(ev1.keyboard.keycode == ALLEGRO_KEY_D){
-							curState->keyPressD();
-							hasSelectedType = true;
-						}
-					}
-				}*/
-				curState->keyPressA();
-				//Render screen with your new class
-				curState->draw();
-				al_flip_display();
-				al_clear_to_color(al_map_rgb(30,30,30));	
-				//Listen for a person to connect
-				myFancySock.iResult = listen(myFancySock.ListenSocket, 2);
-				myFancySock.ClientSocket = accept(myFancySock.ListenSocket, NULL, NULL);
-				closesocket(myFancySock.ListenSocket);
-
-				//Receive what other person's name and class is
-				myFancySock.iResult = recv(myFancySock.ClientSocket, (char*)(struct bitsForSending *)&myFancySock.recvbuf, sizeof(struct bitsForSending), 0);
-				curState->setBitsReceived((struct bitsForSending*)&myFancySock.recvbuf);
-				char tempChar1[DEFAULT_BUFLEN];
-				myFancySock.iResult = recv(myFancySock.ClientSocket, tempChar1, myFancySock.recvbuflen, 0);
-				tempChar1[myFancySock.iResult] = '\0';
-				curState->getMap()->getPlayers().at(1)->setName(tempChar1);
-				
-				//Tell the other person your name and class
-				myFancySock.sendbuf = curState->getBitsToBeSent();
-				myFancySock.iResult = send(myFancySock.ClientSocket, (char*)(struct bitsForSending *)&myFancySock.sendbuf, sizeof(struct bitsForSending), 0);
-				myFancySock.iResult = send(myFancySock.ClientSocket, curState->getMap()->getPlayers().at(0)->getName().c_str(), (int)strlen(curState->getMap()->getPlayers().at(0)->getName().c_str()), 0);
-
+				readyToConnect = true;
 				break;}
 			case 2: //start GameLobby as CLIENT
-				{delete curState;
+				{amIHosting = false;
+				delete curState;
 				curState = new GameLobby();
 				curState->setwindowSize(WIDTH, HEIGHT);
 				curState->setHost("CLIENT");
 				initializeClient(&myFancySock);
-				curState->draw();
-				al_flip_display();
-				al_clear_to_color(al_map_rgb(30,30,30));	
-				/*bool hasSelectedType = false;
-				while(!hasSelectedType){
-					al_wait_for_event(event_queue, &ev);
-					if(ev.type == ALLEGRO_KEY_DOWN){
-						if(ev.keyboard.keycode == ALLEGRO_KEY_A){
-							curState->keyPressA();
-							hasSelectedType = true;
-						}
-						if(ev.keyboard.keycode == ALLEGRO_KEY_D){
-							curState->keyPressD();
-							hasSelectedType = true;									
-						}
-					}
-				}*/
-				curState->keyPressD();
-				curState->draw();
-				al_flip_display();
-				al_clear_to_color(al_map_rgb(30,30,30));	
-
-				//Tell the other person your name and class
-				myFancySock.sendbuf = curState->getBitsToBeSent();
-				myFancySock.iResult = send(myFancySock.ClientSocket, (char*)(struct bitsForSending *)&myFancySock.sendbuf, sizeof(struct bitsForSending), 0);
-				myFancySock.iResult = send(myFancySock.ClientSocket, curState->getMap()->getPlayers().at(0)->getName().c_str(), (int)strlen(curState->getMap()->getPlayers().at(0)->getName().c_str()), 0);
-
-				//Receive what other person's name and class is
-				myFancySock.iResult = recv(myFancySock.ClientSocket, (char*)(struct bitsForSending *)&myFancySock.recvbuf, sizeof(struct bitsForSending), 0);
-				curState->setBitsReceived((struct bitsForSending*)&myFancySock.recvbuf);
-				char tempChar1[DEFAULT_BUFLEN];
-				myFancySock.iResult = recv(myFancySock.ClientSocket, tempChar1, myFancySock.recvbuflen, 0);
-				tempChar1[myFancySock.iResult] = '\0';
-				curState->getMap()->getPlayers().at(1)->setName(tempChar1);
-
+				readyToConnect = true;
 				break;}
 			case 3://go to start menu
 				delete curState;
@@ -225,7 +158,7 @@ int main()
 		case ALLEGRO_EVENT_KEY_DOWN:	//If a key gets pressed down (NOT if a key IS down, only happens when it is first pressed down)
 			if(ev.keyboard.keycode == ALLEGRO_KEY_ESCAPE)
 				done = true;
-			processKeyDown(ev, curState);
+			processKeyDown(ev, curState, &myFancySock);
 			break;
 		case ALLEGRO_EVENT_MOUSE_AXES:
 			curState->setMousePos((ev.mouse.x * WIDTH) / windowWidth, (ev.mouse.y * HEIGHT) / windowHeight);
@@ -253,17 +186,39 @@ int main()
 	return 0;
 }
 //###############################################################################################################
-void processKeyDown(ALLEGRO_EVENT ev, GameState *state)
+void processKeyDown(ALLEGRO_EVENT ev, GameState *state, struct client *myFancySock)
 {
 	switch(ev.keyboard.keycode){
 		case ALLEGRO_KEY_A:		//all this is self explanatory
 			state->keyPressA();
+			//If it needs to connect, do it right after picking your class
+			if(readyToConnect){
+				state->draw();
+				al_flip_display();
+				al_clear_to_color(al_map_rgb(30,30,30));
+				if(amIHosting)
+					connectHost(state, myFancySock);
+				else
+					connectClient(state, myFancySock);
+				readyToConnect = false;
+			}
 			break;
 		case ALLEGRO_KEY_W:
 			state->keyPressW();
 			break;
 		case ALLEGRO_KEY_D:
 			state->keyPressD();
+			//If it needs to connect, do it right after picking your class
+			if(readyToConnect){
+				state->draw();
+				al_flip_display();
+				al_clear_to_color(al_map_rgb(30,30,30));
+				if(amIHosting)
+					connectHost(state, myFancySock);
+				else
+					connectClient(state, myFancySock);
+				readyToConnect = false;
+			}
 			break;
 		case ALLEGRO_KEY_S:
 			state->keyPressS();
@@ -346,4 +301,40 @@ void initializeClient(struct client *newClient){
     }
 
     freeaddrinfo(newClient->result);
+}
+
+void connectClient(GameState *curState, struct client *myFancySock){
+	//Tell the other person your name and class
+	myFancySock->sendbuf = curState->getBitsToBeSent();
+	myFancySock->iResult = send(myFancySock->ClientSocket, (char*)(struct bitsForSending *)&myFancySock->sendbuf, sizeof(struct bitsForSending), 0);
+	myFancySock->iResult = send(myFancySock->ClientSocket, curState->getMap()->getPlayers().at(0)->getName().c_str(), (int)strlen(curState->getMap()->getPlayers().at(0)->getName().c_str()), 0);
+
+	//Receive what other person's name and class is
+	myFancySock->iResult = recv(myFancySock->ClientSocket, (char*)(struct bitsForSending *)&myFancySock->recvbuf, sizeof(struct bitsForSending), 0);
+	curState->setBitsReceived((struct bitsForSending*)&myFancySock->recvbuf);
+	char tempChar1[DEFAULT_BUFLEN];
+	myFancySock->iResult = recv(myFancySock->ClientSocket, tempChar1, myFancySock->recvbuflen, 0);
+	tempChar1[myFancySock->iResult] = '\0';
+	curState->getMap()->getPlayers().at(1)->setName(tempChar1);
+}
+
+void connectHost(GameState *curState, struct client *myFancySock){	
+	//Listen for a person to connect
+	myFancySock->iResult = listen(myFancySock->ListenSocket, 2);
+	myFancySock->ClientSocket = accept(myFancySock->ListenSocket, NULL, NULL);
+	closesocket(myFancySock->ListenSocket);
+
+	//Receive what other person's name and class is
+	myFancySock->iResult = recv(myFancySock->ClientSocket, (char*)(struct bitsForSending *)&myFancySock->recvbuf, sizeof(struct bitsForSending), 0);
+	curState->setBitsReceived((struct bitsForSending*)&myFancySock->recvbuf);
+	char tempChar1[DEFAULT_BUFLEN];
+	myFancySock->iResult = recv(myFancySock->ClientSocket, tempChar1, myFancySock->recvbuflen, 0);
+	tempChar1[myFancySock->iResult] = '\0';
+	curState->getMap()->getPlayers().at(1)->setName(tempChar1);
+
+	//Tell the other person your name and class
+	myFancySock->sendbuf = curState->getBitsToBeSent();
+	myFancySock->iResult = send(myFancySock->ClientSocket, (char*)(struct bitsForSending *)&myFancySock->sendbuf, sizeof(struct bitsForSending), 0);
+	myFancySock->iResult = send(myFancySock->ClientSocket, curState->getMap()->getPlayers().at(0)->getName().c_str(), (int)strlen(curState->getMap()->getPlayers().at(0)->getName().c_str()), 0);
+
 }
