@@ -14,6 +14,7 @@ GameLobby::GameLobby()
 	exitToStart = false;
 	startGame = false;
 	hasSentType = false;
+	hasReceivedType = false;
 	map = new GameMap(10,10,8);
 	shouldSendOrReceive = false;
 }
@@ -93,33 +94,25 @@ void GameLobby::draw(){
 		al_draw_textf(font36, al_map_rgb(55,255,55), windowWidth/2, windowHeight/2-35, ALLEGRO_ALIGN_CENTRE, "%i Player(s):", players.size());
 		for(unsigned int i=0; i<players.size(); i++)
 			if(players.at(i)->getClass() == 0)
-				al_draw_textf(font36, al_map_rgb(155,255,155), windowWidth/2, windowHeight/2 + (35*i), ALLEGRO_ALIGN_CENTRE, "%s be a tree!", players.at(i)->getName().c_str());
+				al_draw_textf(font36, al_map_rgb(155,255,155), windowWidth/2, windowHeight/2 + (35*i), ALLEGRO_ALIGN_CENTRE, "aaa %s be a tree!", players.at(i)->getName().c_str());
 			else 
-				al_draw_textf(font36, al_map_rgb(155,255,155), windowWidth/2, windowHeight/2 + (35*i), ALLEGRO_ALIGN_CENTRE, "%s be a flower!!", players.at(i)->getName().c_str());
+				al_draw_textf(font36, al_map_rgb(155,255,155), windowWidth/2, windowHeight/2 + (35*i), ALLEGRO_ALIGN_CENTRE, "bbb %s be a flower!!", players.at(i)->getName().c_str());
 	}
 }
 
-char* GameLobby::getBitsToBeSent(){
-	char* bitsToSend;
-	if(!hasSentType){
-		if(map->getPlayers().at(0)->getClass() == 0)
-			bitsToSend = "0";
-		else
-			bitsToSend = "1";
-		hasSentType = true;
-	}else{
-		bitsToSend = (char*)map->getPlayers().at(0)->getName().c_str();
-	}
-	//strcat(bitsToSend, map->getPlayers().at(0)->getName().c_str());
+struct bitsForSending GameLobby::getBitsToBeSent(){
+	struct bitsForSending bitsToSend;
+
+	if(map->getPlayers().at(0)->getClass() == 0)
+		bitsToSend.number = 0;
+	else
+		bitsToSend.number = 1;
 
 	return bitsToSend;
 }
 
-void GameLobby::setBitsReceived(char* bitsReceived){
-	std::string str = std::string(bitsReceived);
-	Player* newPlayer = new Player();
-	newPlayer->setClass(str[0]);
-	str.erase(0);
-	newPlayer->setName(str);
+void GameLobby::setBitsReceived(struct bitsForSending *bitsReceived){
+	Player *newPlayer = new Player();
+	newPlayer->setClass(bitsReceived->number);
 	map->addPlayer(newPlayer);
 }

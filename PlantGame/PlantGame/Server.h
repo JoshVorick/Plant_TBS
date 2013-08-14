@@ -15,8 +15,8 @@ struct client{ //functions as client or server
     struct addrinfo *result,
                     *ptr,
                     hints;
-    char* sendbuf;
+    struct bitsForSending sendbuf;
 	int iSendResult;
-    char recvbuf[DEFAULT_BUFLEN];
+    struct bitsForSending recvbuf;
     int recvbuflen;
 };

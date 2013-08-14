@@ -146,12 +146,20 @@ int main()
 				myFancySock.iResult = listen(myFancySock.ListenSocket, 2);
 				myFancySock.ClientSocket = accept(myFancySock.ListenSocket, NULL, NULL);
 				closesocket(myFancySock.ListenSocket);
+
 				//Receive what other person's name and class is
-				myFancySock.iResult = recv(myFancySock.ClientSocket, myFancySock.recvbuf, myFancySock.recvbuflen, 0);
-				curState->setBitsReceived(myFancySock.recvbuf);
+				myFancySock.iResult = recv(myFancySock.ClientSocket, (char*)(struct bitsForSending *)&myFancySock.recvbuf, sizeof(struct bitsForSending), 0);
+				curState->setBitsReceived((struct bitsForSending*)&myFancySock.recvbuf);
+				char tempChar1[DEFAULT_BUFLEN];
+				myFancySock.iResult = recv(myFancySock.ClientSocket, tempChar1, myFancySock.recvbuflen, 0);
+				tempChar1[myFancySock.iResult] = '\0';
+				curState->getMap()->getPlayers().at(1)->setName(tempChar1);
+				
 				//Tell the other person your name and class
 				myFancySock.sendbuf = curState->getBitsToBeSent();
-				myFancySock.iResult = send(myFancySock.ClientSocket, myFancySock.sendbuf, sizeof(myFancySock.sendbuf), 0);
+				myFancySock.iResult = send(myFancySock.ClientSocket, (char*)(struct bitsForSending *)&myFancySock.sendbuf, sizeof(struct bitsForSending), 0);
+				myFancySock.iResult = send(myFancySock.ClientSocket, curState->getMap()->getPlayers().at(0)->getName().c_str(), (int)strlen(curState->getMap()->getPlayers().at(0)->getName().c_str()), 0);
+
 				break;}
 			case 2: //start GameLobby as CLIENT
 				{delete curState;
@@ -180,12 +188,20 @@ int main()
 				curState->draw();
 				al_flip_display();
 				al_clear_to_color(al_map_rgb(30,30,30));	
+
 				//Tell the other person your name and class
 				myFancySock.sendbuf = curState->getBitsToBeSent();
-				myFancySock.iResult = send(myFancySock.ClientSocket, myFancySock.sendbuf, sizeof(myFancySock.sendbuf), 0);
+				myFancySock.iResult = send(myFancySock.ClientSocket, (char*)(struct bitsForSending *)&myFancySock.sendbuf, sizeof(struct bitsForSending), 0);
+				myFancySock.iResult = send(myFancySock.ClientSocket, curState->getMap()->getPlayers().at(0)->getName().c_str(), (int)strlen(curState->getMap()->getPlayers().at(0)->getName().c_str()), 0);
+
 				//Receive what other person's name and class is
-				myFancySock.iResult = recv(myFancySock.ClientSocket, myFancySock.recvbuf, myFancySock.recvbuflen, 0);
-				curState->setBitsReceived(myFancySock.recvbuf);
+				myFancySock.iResult = recv(myFancySock.ClientSocket, (char*)(struct bitsForSending *)&myFancySock.recvbuf, sizeof(struct bitsForSending), 0);
+				curState->setBitsReceived((struct bitsForSending*)&myFancySock.recvbuf);
+				char tempChar1[DEFAULT_BUFLEN];
+				myFancySock.iResult = recv(myFancySock.ClientSocket, tempChar1, myFancySock.recvbuflen, 0);
+				tempChar1[myFancySock.iResult] = '\0';
+				curState->getMap()->getPlayers().at(1)->setName(tempChar1);
+
 				break;}
 			case 3://go to start menu
 				delete curState;
@@ -201,8 +217,6 @@ int main()
 				//delete tempPlayers somehow?
 				break;}
 			case 5: //Client/Server stuff needs to get did
-				std::string tempBuf = curState->getBitsToBeSent();
-				strcpy_s(myFancySock.recvbuf, tempBuf.c_str());
 				break;
 				//send bits or receive them
 			}
@@ -305,7 +319,6 @@ void initializeClient(struct client *newClient){
 	newClient->ClientSocket = INVALID_SOCKET;
 	newClient->result = NULL;
 	newClient->ptr = NULL;
-	newClient->sendbuf = "CLIENT";
 	newClient->recvbuflen = DEFAULT_BUFLEN;
 
 	newClient->iResult = WSAStartup(MAKEWORD(2,2), &newClient->wsaData);
@@ -315,7 +328,7 @@ void initializeClient(struct client *newClient){
     newClient->hints.ai_socktype = SOCK_STREAM;
     newClient->hints.ai_protocol = IPPROTO_TCP;
 	
-	newClient->iResult = getaddrinfo("98.226.11.249", DEFAULT_PORT, &newClient->hints, &newClient->result);
+	newClient->iResult = getaddrinfo("76.29.52.123", DEFAULT_PORT, &newClient->hints, &newClient->result);
 	   // Attempt to connect to an address until one succeeds
     for(newClient->ptr=newClient->result; newClient->ptr != NULL ;newClient->ptr=newClient->ptr->ai_next) {
 

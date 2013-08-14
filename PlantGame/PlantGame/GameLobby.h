@@ -26,6 +26,7 @@ private:
 	bool startGame;
 	bool exitToStart;
 	bool hasSentType;
+	bool hasReceivedType;
 
 public:
 	GameLobby();	//Will have to work for host and non-host joining host's lobby
@@ -41,6 +42,6 @@ public:
 
 	int update();	//updates whatever needs it every sixtieth of a second (including 'time')
 	void draw();	//Magical function that draws everything in-game to the screen
-	char* getBitsToBeSent();
-	void setBitsReceived(char* bitsReceived);
+	struct bitsForSending getBitsToBeSent();
+	void setBitsReceived(struct bitsForSending *bitsReceived);
 };

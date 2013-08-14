@@ -6,8 +6,13 @@
 #include "GameMap.h"
 #include "GameOptions.h"
 
-#define		DEFAULT_BUFLEN		512
+#define		DEFAULT_BUFLEN		12
 #define		DEFAULT_PORT		"27015"
+
+
+struct bitsForSending{
+	int number;
+};
 
 class GameState
 {
@@ -54,6 +59,7 @@ public:
 								//mouse location (make a pop-up box?) and changing values if something is moving across the screen
 								//Won't have too much to it because this is a TBS
 								//returns integer ID if needs to change state, else -1
-	virtual char* getBitsToBeSent() {char* stringsAreFun = "HIIIIIIII"; return stringsAreFun;}
-	void virtual  setBitsReceived(char* bitsReceived) {}
+
+	virtual struct bitsForSending getBitsToBeSent() {struct bitsForSending empty; return empty;}
+	void virtual setBitsReceived(struct bitsForSending *bitsReceived) {}
 };
