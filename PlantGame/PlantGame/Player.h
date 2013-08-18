@@ -11,13 +11,13 @@ class Player
 {
 private:
 	std::string playerName;
-	int playerNumber;
 	int score;
 	int classID;
 	EvoTree* evoTree;
 	std::vector<int> unitsOwned;
 
 public:
+	int playerNumber;
 	Player();	//Takes care of initializing the player
 	~Player();	//Garbage collection
 	void addUnit(int unitID) {unitsOwned.push_back(unitID);}

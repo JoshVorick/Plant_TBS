@@ -6,13 +6,6 @@
 #include "GameMap.h"
 #include "GameOptions.h"
 
-#define		DEFAULT_BUFLEN		12
-#define		DEFAULT_PORT		"27015"
-
-
-struct bitsForSending{
-	int number;
-};
 
 class GameState
 {

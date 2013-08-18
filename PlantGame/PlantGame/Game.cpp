@@ -25,8 +25,6 @@ Game::~Game()
 void Game::addMap(GameMap* newMap)
 {
 	map = newMap;
-	map->addUnit(1,0,0);
-	map->addUnit(0,9,9);
 }
 
 void Game::keyPressA()
@@ -110,4 +108,12 @@ void Game::draw()
 	al_draw_text(font36, al_map_rgb(0,255,0), 25, 60, 0, "Press ENTER to go to start menu");
 	al_draw_text(font36, al_map_rgb(50,150,50), 25,95,0, "Use WASD and scroll");
 	al_draw_text(font36, al_map_rgb(60,220,60), 25, 130, 0, (map->getPlayers().at(map->getCurPlayerNum())->getName()).c_str());
+}
+
+struct bitsForSending Game::getBitsToBeSent(){
+	return map->bitsToSend;
+}
+
+void Game::setBitsReceived(struct bitsForSending *bitsReceived){
+	map->setBits(bitsReceived);
 }

@@ -31,7 +31,7 @@
 #pragma comment (lib, "Ws2_32.lib")
 
 //Function Prototypes
-void processKeyDown(ALLEGRO_EVENT ev, GameState *state, struct client *myFancySock);
+void processKeyDown(ALLEGRO_EVENT ev, GameState *state, struct client *myFancySock, ALLEGRO_EVENT_QUEUE *ev_queue);
 void changeState(int newID, GameState *state);
 void initializeServer(struct client *newServer);
 void initializeClient(struct client *newClient);
@@ -41,6 +41,7 @@ void connectHost(GameState *curState, struct client *myFancySock);
 //Global Constants and Variables as needed
 bool readyToConnect = false;
 bool amIHosting = false;
+bool inGame = false;
 
 int main()
 {
@@ -140,6 +141,7 @@ int main()
 				delete curState;
 				curState = new StartMenu();
 				curState->setwindowSize(WIDTH, HEIGHT);
+				inGame = false;
 				break;
 			case 4://Go from lobby into game
 				{GameMap* map = curState->getMap();
@@ -147,6 +149,15 @@ int main()
 				curState = new Game();
 				curState->addMap(map);
 				curState->setwindowSize(WIDTH, HEIGHT);
+				inGame = true;
+				if(!amIHosting){
+					//Receive necessary bits from other player
+					myFancySock.iResult = recv(myFancySock.ClientSocket, (char*)(struct bitsForSending *)&myFancySock.recvbuf, sizeof(struct bitsForSending), 0);
+					curState->setBitsReceived((struct bitsForSending*)&myFancySock.recvbuf);
+					while(!al_is_event_queue_empty(event_queue)){
+						al_drop_next_event(event_queue);
+					}
+				}
 				//delete tempPlayers somehow?
 				break;}
 			case 5: //Client/Server stuff needs to get did
@@ -158,7 +169,7 @@ int main()
 		case ALLEGRO_EVENT_KEY_DOWN:	//If a key gets pressed down (NOT if a key IS down, only happens when it is first pressed down)
 			if(ev.keyboard.keycode == ALLEGRO_KEY_ESCAPE)
 				done = true;
-			processKeyDown(ev, curState, &myFancySock);
+			processKeyDown(ev, curState, &myFancySock, event_queue);
 			break;
 		case ALLEGRO_EVENT_MOUSE_AXES:
 			curState->setMousePos((ev.mouse.x * WIDTH) / windowWidth, (ev.mouse.y * HEIGHT) / windowHeight);
@@ -186,7 +197,7 @@ int main()
 	return 0;
 }
 //###############################################################################################################
-void processKeyDown(ALLEGRO_EVENT ev, GameState *state, struct client *myFancySock)
+void processKeyDown(ALLEGRO_EVENT ev, GameState *state, struct client *myFancySock, ALLEGRO_EVENT_QUEUE *ev_queue)
 {
 	switch(ev.keyboard.keycode){
 		case ALLEGRO_KEY_A:		//all this is self explanatory
@@ -231,6 +242,22 @@ void processKeyDown(ALLEGRO_EVENT ev, GameState *state, struct client *myFancySo
 			break;
 		case ALLEGRO_KEY_SPACE:
 			state->keyPressSpace();
+			if(inGame){
+				//Send necessary bits to other player
+				myFancySock->sendbuf = state->getBitsToBeSent();
+				myFancySock->iResult = send(myFancySock->ClientSocket, (char*)(struct bitsForSending *)&myFancySock->sendbuf, sizeof(struct bitsForSending), 0);
+				//draw so you can see the new stuffz
+				state->draw();
+				al_draw_filled_rectangle(0,0,WIDTH,HEIGHT,al_map_rgba(0,0,0,150));
+				al_flip_display();
+				al_clear_to_color(al_map_rgb(30,30,30));
+				//Receive necessary bits from other player
+				myFancySock->iResult = recv(myFancySock->ClientSocket, (char*)(struct bitsForSending *)&myFancySock->recvbuf, sizeof(struct bitsForSending), 0);
+				state->setBitsReceived((struct bitsForSending*)&myFancySock->recvbuf);
+				while(!al_is_event_queue_empty(ev_queue)){
+					al_drop_next_event(ev_queue);
+				}
+			}
 			break;
 		case ALLEGRO_KEY_ENTER:
 			state->keyPressEnter();
@@ -311,7 +338,9 @@ void connectClient(GameState *curState, struct client *myFancySock){
 
 	//Receive what other person's name and class is
 	myFancySock->iResult = recv(myFancySock->ClientSocket, (char*)(struct bitsForSending *)&myFancySock->recvbuf, sizeof(struct bitsForSending), 0);
+	myFancySock->recvbuf.numbers[19] = 0;
 	curState->setBitsReceived((struct bitsForSending*)&myFancySock->recvbuf);
+	
 	char tempChar1[DEFAULT_BUFLEN];
 	myFancySock->iResult = recv(myFancySock->ClientSocket, tempChar1, myFancySock->recvbuflen, 0);
 	tempChar1[myFancySock->iResult] = '\0';
@@ -326,7 +355,9 @@ void connectHost(GameState *curState, struct client *myFancySock){
 
 	//Receive what other person's name and class is
 	myFancySock->iResult = recv(myFancySock->ClientSocket, (char*)(struct bitsForSending *)&myFancySock->recvbuf, sizeof(struct bitsForSending), 0);
+	myFancySock->recvbuf.numbers[19] = 1;
 	curState->setBitsReceived((struct bitsForSending*)&myFancySock->recvbuf);
+
 	char tempChar1[DEFAULT_BUFLEN];
 	myFancySock->iResult = recv(myFancySock->ClientSocket, tempChar1, myFancySock->recvbuflen, 0);
 	tempChar1[myFancySock->iResult] = '\0';

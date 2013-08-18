@@ -39,4 +39,6 @@ public:
 	
 	int update();	//updates whatever needs it every sixtieth of a second (including 'time')
 	void draw();	//Magical function that draws everything in-game to the screen
+	struct bitsForSending getBitsToBeSent();
+	void setBitsReceived(struct bitsForSending *bitsReceived);
 };

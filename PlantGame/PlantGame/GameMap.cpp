@@ -25,8 +25,16 @@ GameMap::GameMap(int x, int y, int z)
 	for(int i=0; i<x; i++)
 		for(int j=0; j<y; j++)
 			unitsOnMap[i][j] = NULL;
+	
+	for(int i=0;i<20; i++)
+		bitsToSend.numbers[i] = 0;
 
-
+	for(int i=0;i<MAX_X;i++){
+		for(int j=0; j<MAX_Y; j++){
+			bitsToSend.numLevels[i][j] = 0;
+			bitsToSend.numSeeds[i][j] = 0;
+		}
+	}
 
 	blockImages[0] = al_load_bitmap("Bitmaps/Soil1.bmp");
 	blockImages[1] = al_load_bitmap("Bitmaps/Soil2.bmp");
@@ -135,51 +143,58 @@ bool GameMap::addPlayer(Player* newPlayer)
 
 void GameMap::addUnit(int player, int xLoc, int yLoc)	//This should only add initial units (future units will be added by GameMap from seeds
 {
-	//Get player's settings for their unit and adds it to unitsOnMap[x][y]
-	if(players.at(player)->getClass() == 0)
-		unitsOnMap[xLoc][yLoc] = new Tree(unitWidths[TREE][0], unitHeights[TREE][0]);
-	else
-		unitsOnMap[xLoc][yLoc] = new Flower(unitWidths[FLOWER][0], unitHeights[FLOWER][0]);
-
-	//Add unit to vector of initialized units and add ID to player's list of units
-	units.push_back(unitsOnMap[xLoc][yLoc]);
-	unitsOnMap[xLoc][yLoc]->setID(nextUnitID);
-	players.at(player)->addUnit(nextUnitID);
-	unitsOnMap[xLoc][yLoc]->setOwner(player);
-
-	//SET coordinates for new block
-	//First figure out how high top block is
-	int top=0;
-	for(int k=0; k<z; k++)
-		if(blockMap[xLoc][yLoc][k] != NULL)
-			top++;
+	if(unitsOnMap[xLoc][yLoc] == NULL){
+		//Get player's settings for their unit and adds it to unitsOnMap[x][y]
+		if(players.at(player)->getClass() == 0)
+			unitsOnMap[xLoc][yLoc] = new Tree(unitWidths[TREE][0], unitHeights[TREE][0]);
 		else
-			break;
+			unitsOnMap[xLoc][yLoc] = new Flower(unitWidths[FLOWER][0], unitHeights[FLOWER][0]);
 
-	//set coordinates based on block below it
-	unitsOnMap[xLoc][yLoc]->setCoordinates(blockMap[xLoc][yLoc][top-1]->getX()+(blockWidth/2)-(unitWidths[players.at(player)->getClass()][unitsOnMap[xLoc][yLoc]->getSize()]/2),
-		blockMap[xLoc][yLoc][top-1]->getY()+(blockHeight/2)-(unitHeights[players.at(player)->getClass()][unitsOnMap[xLoc][yLoc]->getSize()]), 1);
+		//Add unit to vector of initialized units and add ID to player's list of units
+		units.push_back(unitsOnMap[xLoc][yLoc]);
+		unitsOnMap[xLoc][yLoc]->setID(nextUnitID);
+		players.at(player)->addUnit(nextUnitID);
+		unitsOnMap[xLoc][yLoc]->myPlayer = players.at(player)->playerNumber;
 
-	unitsOnMap[xLoc][yLoc]->setBlockMap(blockMap, xLoc, yLoc);
-	//increment ID so next unit will have a unique one
-	nextUnitID++;
+		//SET coordinates for new block
+		//First figure out how high top block is
+		int top=0;
+		for(int k=0; k<z; k++)
+			if(blockMap[xLoc][yLoc][k] != NULL)
+				top++;
+			else
+				break;
+
+		//set coordinates based on block below it
+		unitsOnMap[xLoc][yLoc]->setCoordinates(blockMap[xLoc][yLoc][top-1]->getX()+(blockWidth/2)-(unitWidths[players.at(player)->getClass()][unitsOnMap[xLoc][yLoc]->getSize()]/2),
+			blockMap[xLoc][yLoc][top-1]->getY()+(blockHeight/2)-(unitHeights[players.at(player)->getClass()][unitsOnMap[xLoc][yLoc]->getSize()]), 1);
+
+		unitsOnMap[xLoc][yLoc]->setBlockMap(blockMap, xLoc, yLoc);
+		//increment ID so next unit will have a unique one
+		nextUnitID++;
+	}
 }
 
 void GameMap::mouseClick(int mouseX, int mouseY){
 	if(selectedUnit != NULL){
 		if(HEIGHT-mouseY < PLANT_UPGRADE_Y && mouseX > PLANT_UPGRADE_X + 300 && mouseX < PLANT_UPGRADE_X + 500){
-			if(curPlayer == 0){
-				if(selectedUnit->levelUp()){ //returns true if plant changed size
-				//update X and Y for plant
-				selectedUnit->setCoordinates(blockUnderSelectedUnit->getX()+(blockWidth/2)-(unitWidths[players.at(selectedUnit->getOwner())->getClass()][selectedUnit->getSize()]/2),
-						blockUnderSelectedUnit->getY()+(blockHeight/2)-(unitHeights[players.at(selectedUnit->getOwner())->getClass()][selectedUnit->getSize()]), 1);
+			if(curPlayer == 0 && players.at(0)->playerNumber == selectedUnit->myPlayer){
+				if(selectedUnit->levelUp()){ //returns true if plant grew
+					//update X and Y for plant
+					selectedUnit->setCoordinates(blockUnderSelectedUnit->getX()+(blockWidth/2)-(unitWidths[players.at(selectedUnit->myPlayer)->getClass()][selectedUnit->getSize()]/2),
+						blockUnderSelectedUnit->getY()+(blockHeight/2)-(unitHeights[players.at(selectedUnit->myPlayer)->getClass()][selectedUnit->getSize()]), 1);
+					//Set bits to tell other player this leveled up
+					bitsToSend.numLevels[selectedUnitCoor[0]][selectedUnitCoor[1]]++;
 				}
 			}
 		}else if(HEIGHT-mouseY < PLANT_UPGRADE_Y && mouseX > PLANT_UPGRADE_X + 500 && mouseX < PLANT_UPGRADE_X + 700){
 			//make a seed
-			if(curPlayer == 0)
-				if(selectedUnit->makeSeed()) //returns true if you have minerals to make a seed
+			if(curPlayer == 0 && players.at(0)->playerNumber == selectedUnit->myPlayer)
+				if(selectedUnit->makeSeed()){ //returns true if you have minerals to make a seed
 					seedsOnMap[selectedUnitCoor[0]][selectedUnitCoor[1]][curPlayer]->addSeed();
+					//Set bits to tell other player this made a seed
+					bitsToSend.numSeeds[selectedUnitCoor[0]][selectedUnitCoor[1]]++;
+				}
 		}else{
 			selectedUnit->toggleSelected(); 
 			selectedUnitCoor[0] = -1;
@@ -195,7 +210,7 @@ void GameMap::mouseClick(int mouseX, int mouseY){
 		blockUnderSelectedUnit = blockMap[blockMouseIsOn[0]][blockMouseIsOn[1]][blockMouseIsOn[2]];
 	}
 	//Check for autopilot
-	if(mouseX > WIDTH - 200 && mouseY < 35)
+	if(mouseX > WIDTH - 200 && mouseY < 50)
 		autopilot = !autopilot;
 }
 
@@ -268,7 +283,7 @@ void GameMap::nextTurn()
 			}
 		}
 	}
-	curPlayer = (curPlayer+1) % numPlayers;
+	//curPlayer = (curPlayer+1) % numPlayers;
 
 	//Do autopilot things
 	if(autopilot){
@@ -277,11 +292,13 @@ void GameMap::nextTurn()
 			hasMinerals = false;
 			for(int i=0; i<x; i++){
 				for(int j=0; j<y; j++){
-					if(unitsOnMap[i][j] != NULL && unitsOnMap[i][j]->getOwner() == curPlayer){
+					if(unitsOnMap[i][j] != NULL && unitsOnMap[i][j]->myPlayer == players.at(0)->playerNumber){
 						if(unitsOnMap[i][j]->getLevel() < 10){
 							if(!(selectedUnit != NULL) || selectedUnit != unitsOnMap[i][j])
 								unitsOnMap[i][j]->toggleSelected();
 							if(unitsOnMap[i][j]->levelUp()){
+								//Tell other player this leveled up
+								bitsToSend.numLevels[i][j] += 1;
 								hasMinerals = true;
 								int top=0;
 								for(int k=0; k<z; k++)
@@ -296,6 +313,8 @@ void GameMap::nextTurn()
 								unitsOnMap[i][j]->toggleSelected();
 						}else{
 							if(unitsOnMap[i][j]->makeASeed()){
+								//Tell other player this made a seed
+								bitsToSend.numSeeds[i][j] += 1;
 								seedsOnMap[i][j][curPlayer]->addSeed();
 								hasMinerals = true;
 							}
@@ -377,7 +396,49 @@ void GameMap::draw(int camX, int camY, int camZ, double zoom, ALLEGRO_FONT* font
 		state = "Off";
 
 	if(mouseX > WIDTH - 200 && mouseY < 35)
-		al_draw_textf(font, al_map_rgb(155,200,225), WIDTH, 0, ALLEGRO_ALIGN_RIGHT, "AUTOPILOT: %s", state);
+		al_draw_textf(font, al_map_rgb(155,200,225), WIDTH, 15, ALLEGRO_ALIGN_RIGHT, "AUTOPILOT: %s", state);
 	else
-		al_draw_textf(font, al_map_rgb(255,255,255), WIDTH, 0, ALLEGRO_ALIGN_RIGHT, "AUTOPILOT: %s", state);
+		al_draw_textf(font, al_map_rgb(255,255,255), WIDTH, 15, ALLEGRO_ALIGN_RIGHT, "AUTOPILOT: %s", state);
+}
+
+void GameMap::setBits(struct bitsForSending *bitsToBeProcessed){
+	for(int i=0;i<MAX_X;i++){
+		for(int j=0; j<MAX_Y; j++){
+			if(unitsOnMap[i][j] != NULL){
+				while(bitsToBeProcessed->numLevels[i][j] > 0){
+					if(!(selectedUnit != NULL) || selectedUnit != unitsOnMap[i][j])
+						unitsOnMap[i][j]->toggleSelected();
+					bitsToBeProcessed->numLevels[i][j] -= 1;
+					if(unitsOnMap[i][j]->levelUp()){
+						int top=0;
+						for(int k=0; k<z; k++)
+							if(blockMap[i][j][k] != NULL)
+								top++;
+							else
+								break;
+						unitsOnMap[i][j]->setCoordinates(blockMap[i][j][top-1]->getX()+(blockWidth/2)-(unitWidths[unitsOnMap[i][j]->getClass()][unitsOnMap[i][j]->getSize()]/2),
+  							blockMap[i][j][top-1]->getY()+(blockHeight/2)-(unitHeights[unitsOnMap[i][j]->getClass()][unitsOnMap[i][j]->getSize()]), 1);
+					}
+					if(!(selectedUnit != NULL) || selectedUnit != unitsOnMap[i][j])
+						unitsOnMap[i][j]->toggleSelected();
+				}
+				while(bitsToBeProcessed->numSeeds[i][j] > 0){
+					bitsToBeProcessed->numSeeds[i][j] -= 1;
+					if(unitsOnMap[i][j]->makeASeed())
+						seedsOnMap[i][j][1]->addSeed();
+				}
+			}
+		}
+	}
+
+	//Reset all values of my bits to send to 0
+	for(int i=0;i<20; i++)
+		bitsToSend.numbers[i] = 0;
+
+	for(int i=0;i<MAX_X;i++){
+		for(int j=0; j<MAX_Y; j++){
+			bitsToSend.numLevels[i][j] = 0;
+			bitsToSend.numSeeds[i][j] = 0;
+		}
+	}
 }

@@ -104,15 +104,21 @@ struct bitsForSending GameLobby::getBitsToBeSent(){
 	struct bitsForSending bitsToSend;
 
 	if(map->getPlayers().at(0)->getClass() == 0)
-		bitsToSend.number = 0;
+		bitsToSend.numbers[0] = 0;
 	else
-		bitsToSend.number = 1;
+		bitsToSend.numbers[0] = 1;
 
 	return bitsToSend;
 }
 
 void GameLobby::setBitsReceived(struct bitsForSending *bitsReceived){
 	Player *newPlayer = new Player();
-	newPlayer->setClass(bitsReceived->number);
+	newPlayer->setClass(bitsReceived->numbers[0]);
 	map->addPlayer(newPlayer);
+
+	map->getPlayers().at(1)->playerNumber = bitsReceived->numbers[19];
+	map->getPlayers().at(0)->playerNumber = bitsReceived->numbers[19]^1;
+
+	map->addUnit(bitsReceived->numbers[19],0,0);
+	map->addUnit(bitsReceived->numbers[19]^1,9,9);
 }

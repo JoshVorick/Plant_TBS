@@ -54,13 +54,13 @@ bool Unit::makeSeed(){
 }
 
 bool Unit::levelUp(){ //returns true if the size changes
-	bool doesSizeChange = false;
+	bool leveledUp = false;
 
 	if(mineralsStored >= mineralsToLevelUp){
+		leveledUp = true;
 		mineralsStored -= mineralsToLevelUp;
 		if(level % 4 == 3 && size < 2){
 			size++;
-			doesSizeChange = true;
 		}
 		for(int k=MAX_Z; k>=level; k--){
 			if(blockMap[xLoc][yLoc][k-level] != NULL){
@@ -75,7 +75,7 @@ bool Unit::levelUp(){ //returns true if the size changes
 		level++;
 		mineralsToLevelUp += 25;
 	}
-	return doesSizeChange;
+	return leveledUp;
 }
 
 bool Unit::makeASeed(){

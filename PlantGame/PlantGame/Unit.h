@@ -19,7 +19,6 @@ protected:
 	int maxHitPoints;	//Max hp of a unit
 	int level;		//Level of plant. Increases with mineral surplus
 	int size;
-	int playerNum;	//Pointer to the player who owns the plant
 	int resilience;	//Maybe a measure of how hardy the plant is? How much it takes for it to start dying?
 	int mineralsToProduceASeed;	//minerals needed to make a seed
 	int waterToProduceASeed;	//water needed to make a seed
@@ -31,6 +30,7 @@ protected:
 	std::vector<Block*> hasRootsIn; //Points to which blocks the unit has roots in
 
 public:
+	int myPlayer; //player that owns this unit
 	Unit();
 	~Unit();	//Garbage collection
 	void toggleSelected() {for(unsigned int i=0; i<hasRootsIn.size(); i++) hasRootsIn.at(i)->toggleHighlight();}
@@ -42,8 +42,6 @@ public:
 	int getSize() {return size;}
 	int getCurrentHitPoints() {return hitPoints;}	//Returns the plant's current hit points
 	int getMaxHitPoints() {return maxHitPoints;}	//Returns the max hp of the plant
-	void setOwner(int playerNum) {this->playerNum = playerNum;}	//Sets the player who owns the plant
-	int getOwner() {return playerNum;}	//Returns the owner of the plant
 	int getResilience() {return resilience;}	//Returns the defense stat of the plant
 	bool makeSeed();
 	bool levelUp();

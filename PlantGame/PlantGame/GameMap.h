@@ -7,6 +7,7 @@
 #include "Bush.h"
 #include "Player.h"
 #include "Seed.h"
+//#include "GameState.h"
 
 enum CAMERA_ANGLES {NORTH_WEST, NORTH_EAST, SOUTH_WEST, SOUTH_EAST};
 #define NUM_UNIT_TYPES		2	//num of units with images
@@ -54,10 +55,10 @@ private:
 	int y;	//Dimension along the north-south axis
 	int z;	//Dimension along the up-down axis
 	int angleID;
-	
-	void addSeed(int x, int y);
 
 public:
+	struct bitsForSending bitsToSend;
+
 	GameMap(int x, int y, int z);	//Creates an x by y by z map
 	~GameMap();
 	bool addPlayer(Player* newPlayer);
@@ -70,4 +71,6 @@ public:
 	void changeCamera(int dx, int dy, int dz, double dZoom);
 	void nextTurn(); //Updates units and blocks for next player's turn
 	void draw(int x, int y,int z, double zoom, ALLEGRO_FONT* font, int mouseX, int mouseY);	//Draws based on camera position
+
+	void setBits(struct bitsForSending *bitsToBeProcessed);
 };
