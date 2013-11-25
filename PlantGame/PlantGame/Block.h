@@ -13,7 +13,7 @@
 #define MAX_X 10
 #define MAX_Y 10
 #define MAX_Z 8
-#define		DEFAULT_BUFLEN		12
+#define		DEFAULT_BUFLEN		256
 #define		DEFAULT_PORT		"27015"
 
 enum blockIDS {SOIL1, SOIL2, SOIL3, SOIL4}; //AIR is NULL pointer, see GameMap

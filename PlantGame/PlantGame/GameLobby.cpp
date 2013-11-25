@@ -15,8 +15,8 @@ GameLobby::GameLobby()
 	startGame = false;
 	hasSentType = false;
 	hasReceivedType = false;
-	map = new GameMap(10,10,8);
 	shouldSendOrReceive = false;
+	map = new GameMap(MAX_X, MAX_Y, MAX_Z);
 }
 
 GameLobby::~GameLobby()

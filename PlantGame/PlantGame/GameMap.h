@@ -26,8 +26,6 @@ private:
 	int nextUnitID; //ID to be given to next unit
 	std::vector<Player*> players;	//The players in this game
 	std::vector<Unit*> units; //array of initialized units
-	Block* blockMap[MAX_X+1][MAX_Y+1][MAX_Z+1];	//Three dimensional game-world map. It is one bigger in each dir to make drawing easier
-				//For now this is a 10x10x8 array to make it easier
 	Unit* unitsOnMap[MAX_X][MAX_Y]; //pointers to the units on the map so that game map has easier time knowing where/if units are
 							  //updates when units are added
 							  //possibly a better way to do this?
@@ -57,6 +55,8 @@ private:
 	int angleID;
 
 public:
+	Block* blockMap[MAX_X+1][MAX_Y+1][MAX_Z+1];	//Three dimensional game-world map. It is one bigger in each dir to make drawing easier
+				//For now this is a 10x10x8 array to make it easier
 	struct bitsForSending bitsToSend;
 
 	GameMap(int x, int y, int z);	//Creates an x by y by z map

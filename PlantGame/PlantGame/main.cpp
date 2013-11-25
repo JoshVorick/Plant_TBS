@@ -335,16 +335,54 @@ void connectClient(GameState *curState, struct client *myFancySock){
 	myFancySock->sendbuf = curState->getBitsToBeSent();
 	myFancySock->iResult = send(myFancySock->ClientSocket, (char*)(struct bitsForSending *)&myFancySock->sendbuf, sizeof(struct bitsForSending), 0);
 	myFancySock->iResult = send(myFancySock->ClientSocket, curState->getMap()->getPlayers().at(0)->getName().c_str(), (int)strlen(curState->getMap()->getPlayers().at(0)->getName().c_str()), 0);
+	
+	struct bitsForSending mapGettingSent[MAX_Z/2];
+	GameMap *tempMap = curState->getMap();
+	ALLEGRO_BITMAP* referenceBlock = al_load_bitmap("Bitmaps/Soil4.bmp");
+	int blockWidth = al_get_bitmap_width(referenceBlock);
+	int blockHeight = al_get_bitmap_height(referenceBlock)-1; //-1 because it looks better;
+	int blockPerceivedHeight = 32;
+	for(int i=0; i<=MAX_X; i++){
+		for(int j=0;j<=MAX_Y; j++){
+			for(int k=0; k<MAX_Z/2; k+=2){
+				if(tempMap->blockMap[i][j][k] != NULL)
+					mapGettingSent[k/2].numLevels[i][j] = tempMap->blockMap[i][j][k]->getBitmap();
+				else
+					mapGettingSent[k/2].numLevels[i][j] = -1;
+
+				if(tempMap->blockMap[i][j][k+1] != NULL)
+					mapGettingSent[k/2].numSeeds[i][j] = tempMap->blockMap[i][j][k+1]->getBitmap();
+				else
+					mapGettingSent[k/2].numSeeds[i][j] = -1;
+			}
+		}
+	}
+	//Initialize Block and Unit coordinates
+	for(int i=0; i<MAX_X; i++){	//x
+		for(int j=0; j<MAX_Y; j++){ //y{	
+			int top=0;
+			for(int k=0; k<MAX_Z; k++){//z
+				//Initialize block coordinates
+				if(tempMap->blockMap[i][j][k] != NULL){
+					tempMap->blockMap[i][j][k]->setCoordinates(((MAX_X-1)*blockWidth/2)+(i*blockWidth/2)-(j*blockWidth/2),
+						blockPerceivedHeight+((j+i)*(blockHeight-blockPerceivedHeight)/2)-((k)*(blockPerceivedHeight-4)),1);
+					top++;
+				}
+			}
+		}
+	}
+	curState->addMap(tempMap);
+	myFancySock->iResult = send(myFancySock->ClientSocket, (char*)(struct bitsForSending *)mapGettingSent, sizeof(struct bitsForSending)*MAX_Z/2, 0);
 
 	//Receive what other person's name and class is
 	myFancySock->iResult = recv(myFancySock->ClientSocket, (char*)(struct bitsForSending *)&myFancySock->recvbuf, sizeof(struct bitsForSending), 0);
 	myFancySock->recvbuf.numbers[19] = 0;
 	curState->setBitsReceived((struct bitsForSending*)&myFancySock->recvbuf);
 	
-	char tempChar1[DEFAULT_BUFLEN];
-	myFancySock->iResult = recv(myFancySock->ClientSocket, tempChar1, myFancySock->recvbuflen, 0);
-	tempChar1[myFancySock->iResult] = '\0';
-	curState->getMap()->getPlayers().at(1)->setName(tempChar1);
+	char tempChar[DEFAULT_BUFLEN];
+	myFancySock->iResult = recv(myFancySock->ClientSocket, tempChar, myFancySock->recvbuflen, 0);
+	tempChar[myFancySock->iResult] = '\0';
+	curState->getMap()->getPlayers().at(1)->setName(tempChar);
 }
 
 void connectHost(GameState *curState, struct client *myFancySock){	
@@ -358,14 +396,53 @@ void connectHost(GameState *curState, struct client *myFancySock){
 	myFancySock->recvbuf.numbers[19] = 1;
 	curState->setBitsReceived((struct bitsForSending*)&myFancySock->recvbuf);
 
-	char tempChar1[DEFAULT_BUFLEN];
-	myFancySock->iResult = recv(myFancySock->ClientSocket, tempChar1, myFancySock->recvbuflen, 0);
-	tempChar1[myFancySock->iResult] = '\0';
-	curState->getMap()->getPlayers().at(1)->setName(tempChar1);
+	char tempChar[DEFAULT_BUFLEN];
+	myFancySock->iResult = recv(myFancySock->ClientSocket, tempChar, myFancySock->recvbuflen, 0);
+	//tempChar[myFancySock->iResult] = '\0';
+	curState->getMap()->getPlayers().at(1)->setName(tempChar);
+	
+	struct bitsForSending mapGettingSent[MAX_Z/2];
+	myFancySock->iResult = recv(myFancySock->ClientSocket, (char*)(struct bitsForSending *)mapGettingSent, sizeof(struct bitsForSending)*MAX_Z/2, 0);
+	GameMap *tempMap = curState->getMap();
+	
+	ALLEGRO_BITMAP* referenceBlock = al_load_bitmap("Bitmaps/Soil4.bmp");
+	int blockWidth = al_get_bitmap_width(referenceBlock);
+	int blockHeight = al_get_bitmap_height(referenceBlock)-1; //-1 because it looks better;
+	int blockPerceivedHeight = 32;
 
+	for(int i=0; i<=MAX_X; i++){
+		for(int j=0;j<=MAX_Y; j++){
+			for(int k=0; k<MAX_Z; k+=2){
+				delete tempMap->blockMap[i][j][k];
+				if(mapGettingSent[k/2].numLevels[i][j] == -1)
+					tempMap->blockMap[i][j][k] = NULL;
+				else
+					tempMap->blockMap[i][j][k] = new Block(mapGettingSent[k/2].numLevels[i][j], blockWidth, blockHeight);
+
+				delete tempMap->blockMap[i][j][k+1];
+				if(mapGettingSent[k/2].numSeeds[i][j] == -1)
+					tempMap->blockMap[i][j][k+1] = NULL;
+				else
+					tempMap->blockMap[i][j][k+1] = new Block(mapGettingSent[k/2].numSeeds[i][j], blockWidth, blockHeight);
+			}
+		}
+	}
+	for(int i=0; i<MAX_X; i++){	//x
+		for(int j=0; j<MAX_Y; j++){ //y{	
+			int top=0;
+			for(int k=0; k<MAX_Z; k++){//z
+				//Initialize block coordinates
+				if(tempMap->blockMap[i][j][k] != NULL){
+					tempMap->blockMap[i][j][k]->setCoordinates(((MAX_X-1)*blockWidth/2)+(i*blockWidth/2)-(j*blockWidth/2),
+						blockPerceivedHeight+((j+i)*(blockHeight-blockPerceivedHeight)/2)-((k)*(blockPerceivedHeight-4)),1);
+					top++;
+				}
+			}
+		}
+	}
+	
 	//Tell the other person your name and class
 	myFancySock->sendbuf = curState->getBitsToBeSent();
 	myFancySock->iResult = send(myFancySock->ClientSocket, (char*)(struct bitsForSending *)&myFancySock->sendbuf, sizeof(struct bitsForSending), 0);
 	myFancySock->iResult = send(myFancySock->ClientSocket, curState->getMap()->getPlayers().at(0)->getName().c_str(), (int)strlen(curState->getMap()->getPlayers().at(0)->getName().c_str()), 0);
-
 }
